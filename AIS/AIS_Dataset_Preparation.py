@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 dataset_chosen = "WoW"
 wow_saved_filename = "datasets/WoW/ann_wow_with_dialogue+retrieved_passages.csv"
+wow_documents_filename = "datasets/WoW/train_documents.csv"
 
 if dataset_chosen == "WoW":
 
@@ -40,6 +41,26 @@ if dataset_chosen == "WoW":
 
     wow_testing_data.to_csv(wow_saved_filename, sep="\t")
     print("Saved file to: " + wow_saved_filename)
+
+    breakpoint()
+
+    ##################################################
+
+    with open('datasets/WoW/train.json', 'r') as file:
+        train_passages_json = json.load(file)
+
+    total_passages_retrieved = []
+    for row in range(len(train_passages_json)):
+        for dialogue_passage in range(len(train_passages_json[row]['dialog'])):
+            for retrieved_passage in train_passages_json[row]['dialog'][dialogue_passage]['retrieved_passages']:
+                current_passage_retrieved = list(retrieved_passage.values())[0][0]
+                total_passages_retrieved.append(current_passage_retrieved)
+
+    documents = pd.DataFrame(total_passages_retrieved, columns=["document"])
+    documents.to_csv(wow_documents_filename, sep="\t")
+    print("Saved file to: " + wow_documents_filename)
+
+    breakpoint()
     
 
     

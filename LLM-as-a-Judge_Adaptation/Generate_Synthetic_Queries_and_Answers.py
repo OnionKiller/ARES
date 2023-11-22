@@ -150,6 +150,10 @@ if __name__ == '__main__':
 
         documents = pd.DataFrame(documents, columns=["document"])
 
+    elif "ais" in document_filepath:
+
+        documents = pd.read_csv(document_filepath, sep="\t")
+        
     else:
         documents = pd.read_csv(document_filepath, sep="\t")
         if "multirc" not in document_filepath and "record" not in document_filepath:

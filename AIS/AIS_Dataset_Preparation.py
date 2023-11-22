@@ -30,7 +30,7 @@ if dataset_chosen == "WoW":
     total_dialogues = []
     total_passages = []
     for row in range(len(wow_testing_data)):
-        dialogue, retrieved_passage = gather_dialogue_and_retrieved_passage(wow_testing_data.iloc[row]['ex-idx'])
+        dialogue, retrieved_passage = gather_dialogue_and_retrieved_passage(wow_testing_data.iloc[row]['ex-idx '])
         total_dialogues.append(dialogue)
         total_passages.append(retrieved_passage)
 

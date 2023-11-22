@@ -75,9 +75,7 @@ for evaluation_dataset in evaluation_datasets:
         print("context_subset: " + str(len(context_subset)))
         print("answer_subset: " + str(len(answer_subset)))
         context_subset = context_subset.sample(n=150, random_state=42) 
-        answer_subset = answer_subset.sample(n=15
-                                             
-                                             0, random_state=42) 
+        answer_subset = answer_subset.sample(n=150, random_state=42) 
         
         context_relevance_prediction = sum(context_subset["Context_Relevance_Label"].tolist()) / len(context_subset)
         answer_relevance_prediction = sum(answer_subset["Answer_Relevance_Label"].tolist()) / len(answer_subset)

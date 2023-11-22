@@ -43,12 +43,12 @@ for evaluation_dataset in evaluation_datasets:
     # Apply the function to the 'text_column' to convert it to a column of lists
     dataset['contexts'] = dataset['Document'].apply(string_to_list)
 
-    dataset = Dataset.from_pandas(dataset)
-    dataset = dataset.rename_column("Query", "question")
-    dataset = dataset.rename_column("Answer", "answer")
-    #dataset = dataset.rename_column("Document", "contexts")
-
     if not use_annotations_for_ranking:
+
+        dataset = Dataset.from_pandas(dataset)
+        dataset = dataset.rename_column("Query", "question")
+        dataset = dataset.rename_column("Answer", "answer")
+        #dataset = dataset.rename_column("Document", "contexts")
 
         results = evaluate(dataset, metrics=[
             context_precision,

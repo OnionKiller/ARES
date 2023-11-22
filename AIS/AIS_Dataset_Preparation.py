@@ -42,7 +42,7 @@ if dataset_chosen == "WoW":
     wow_testing_data.to_csv(wow_saved_filename, sep="\t")
     print("Saved file to: " + wow_saved_filename)
 
-    breakpoint()
+    #breakpoint()
 
     ##################################################
 
@@ -50,7 +50,7 @@ if dataset_chosen == "WoW":
         train_passages_json = json.load(file)
 
     total_passages_retrieved = []
-    for row in range(len(train_passages_json)):
+    for row in tqdm(range(len(train_passages_json))):
         for dialogue_passage in range(len(train_passages_json[row]['dialog'])):
             for retrieved_passage in train_passages_json[row]['dialog'][dialogue_passage]['retrieved_passages']:
                 current_passage_retrieved = list(retrieved_passage.values())[0][0]
@@ -60,7 +60,7 @@ if dataset_chosen == "WoW":
     documents.to_csv(wow_documents_filename, sep="\t")
     print("Saved file to: " + wow_documents_filename)
 
-    breakpoint()
+    #breakpoint()
     
 
     

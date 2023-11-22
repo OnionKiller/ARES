@@ -53,8 +53,8 @@ if dataset_chosen == "WoW":
     for row in tqdm(range(len(train_passages_json))):
         for dialogue_passage in range(len(train_passages_json[row]['dialog'])):
             for retrieved_passage in train_passages_json[row]['dialog'][dialogue_passage]['retrieved_passages']:
-                current_passage_retrieved = list(retrieved_passage.values())[0][0]
-                total_passages_retrieved.append(current_passage_retrieved)
+                for current_passage_retrieved in list(retrieved_passage.values())[0]:
+                    total_passages_retrieved.append(current_passage_retrieved)
 
     documents = pd.DataFrame(total_passages_retrieved, columns=["document"])
     documents.to_csv(wow_documents_filename, sep="\t")

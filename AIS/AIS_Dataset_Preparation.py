@@ -36,9 +36,10 @@ if dataset_chosen == "WoW":
         total_passages.append(retrieved_passage)
 
     wow_testing_data['Dialogue'] = total_dialogues
-    wow_testing_data['Passages'] = total_passages
+    wow_testing_data['Passage'] = total_passages
 
     wow_testing_data.to_csv(wow_saved_filename, sep="\t")
+    print("Saved file to: " + wow_saved_filename)
     
 
     

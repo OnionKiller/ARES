@@ -1,6 +1,7 @@
 
 import json
 import pandas as pd
+from tqdm import tqdm
 
 dataset_chosen = "WoW"
 wow_saved_filename = "datasets/WoW/ann_wow_with_dialogue+retrieved_passages.csv"
@@ -17,7 +18,7 @@ if dataset_chosen == "WoW":
         dialogue = (" ").join(dialogue)
 
         retrieved_passage = dialogue_and_passages_json[convo_no]['dialog'][turn_no]['checked_sentence']
-        assert len(list(retrieved_passage)) == 0
+        assert len(list(retrieved_passage)) == 1
         retrieved_passage_key = list(retrieved_passage)[0]
         retrieved_passage = retrieved_passage[retrieved_passage_key]
         return dialogue, retrieved_passage
@@ -29,7 +30,7 @@ if dataset_chosen == "WoW":
 
     total_dialogues = []
     total_passages = []
-    for row in range(len(wow_testing_data)):
+    for row in tqdm(range(len(wow_testing_data))):
         dialogue, retrieved_passage = gather_dialogue_and_retrieved_passage(wow_testing_data.iloc[row]['ex-idx '])
         total_dialogues.append(dialogue)
         total_passages.append(retrieved_passage)

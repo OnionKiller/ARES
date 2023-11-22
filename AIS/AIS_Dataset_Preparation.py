@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 dataset_chosen = "WoW"
 wow_saved_filename = "datasets/WoW/ann_wow_with_dialogue+retrieved_passages.csv"
-wow_documents_filename = "datasets/WoW/train_documents.csv"
+wow_documents_filename = "datasets/WoW/ais_wow_train_documents.csv"
 
 if dataset_chosen == "WoW":
 

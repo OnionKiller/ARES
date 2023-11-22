@@ -72,8 +72,10 @@ for evaluation_dataset in evaluation_datasets:
         #print("Filtered Length: " + str(len(dataset)))
         assert len(dataset) >= 300
         sampled_y_labels = dataset.sample(n=300, random_state=42)
-        context_relevance_prediction = sum(dataset["Context_Relevance_Label"].dropna(subset=["Context_Relevance_Label"]).tolist()) / len(sampled_y_labels)
-        answer_relevance_prediction = sum(dataset["Answer_Relevance_Label"].dropna(subset=["Answer_Relevance_Label"]).tolist()) / len(sampled_y_labels)
+        context_subset = dataset.dropna(subset=["Context_Relevance_Label"]) 
+        answer_subset = dataset.dropna(subset=["Answer_Relevance_Label"]) 
+        context_relevance_prediction = sum(context_subset["Context_Relevance_Label"].tolist()) / len(sampled_y_labels)
+        answer_relevance_prediction = sum(answer_subset["Answer_Relevance_Label"].tolist()) / len(sampled_y_labels)
         #print("context_relevance_prediction: " + str(context_relevance_prediction))
         #print("answer_relevance_prediction: " + str(answer_relevance_prediction))
         context_scores.append(context_relevance_prediction)

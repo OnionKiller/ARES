@@ -34,7 +34,7 @@ answer_relevance_scores = []
 answer_faithfulness_scores = []
 
 for evaluation_dataset in evaluation_datasets:
-    dataset = pd.read_csv(evaluation_dataset.replace("../", "../../ColBERT-FM/"), sep="\t")
+    dataset = pd.read_csv(evaluation_dataset.replace("../", "../ColBERT-FM/"), sep="\t")
     dataset = dataset[:2000]
 
     def string_to_list(text):

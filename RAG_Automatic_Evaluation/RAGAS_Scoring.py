@@ -67,7 +67,7 @@ for evaluation_dataset in evaluation_datasets:
 
     else:
         dataset = pd.read_csv(evaluation_dataset.replace("../", "../ColBERT-FM/"), sep="\t")
-        dataset = dataset.dropna(["Context_Relevance_Label", "Answer_Relevance_Label"])
+        dataset = dataset.dropna(subset=["Context_Relevance_Label", "Answer_Relevance_Label"])
         print("Filtered Length: " + str(len(dataset)))
         assert len(dataset) >= 300
         sampled_y_labels = dataset.sample(n=300, random_state=42)

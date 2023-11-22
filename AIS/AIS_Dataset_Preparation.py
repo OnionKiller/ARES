@@ -54,7 +54,8 @@ if dataset_chosen == "WoW":
         for dialogue_passage in range(len(train_passages_json[row]['dialog'])):
             for retrieved_passage in train_passages_json[row]['dialog'][dialogue_passage]['retrieved_passages']:
                 for current_passage_retrieved in list(retrieved_passage.values())[0]:
-                    total_passages_retrieved.append(current_passage_retrieved)
+                    if current_passage_retrieved not in total_passages_retrieved:
+                        total_passages_retrieved.append(current_passage_retrieved)
 
     documents = pd.DataFrame(total_passages_retrieved, columns=["document"])
     documents.to_csv(wow_documents_filename, sep="\t")

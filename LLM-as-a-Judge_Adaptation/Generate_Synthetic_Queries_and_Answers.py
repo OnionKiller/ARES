@@ -153,7 +153,8 @@ if __name__ == '__main__':
     elif "ais" in document_filepath:
 
         documents = pd.read_csv(document_filepath, sep="\t")
-        
+        documents = documents.sample(n=documents_sampled, random_state=43)
+
     else:
         documents = pd.read_csv(document_filepath, sep="\t")
         if "multirc" not in document_filepath and "record" not in document_filepath:

@@ -68,6 +68,7 @@ for evaluation_dataset in evaluation_datasets:
     else:
         dataset = pd.read_csv(evaluation_dataset.replace("../", "../ColBERT-FM/"), sep="\t")
         dataset = dataset.dropna()
+        print("Filtered Length: " + str(len(dataset)))
         assert len(dataset) == 300
         sampled_y_labels = dataset.sample(n=300, random_state=42)
         context_relevance_prediction = sum(dataset["Context_Relevance_Label"].tolist()) / len(sampled_y_labels)

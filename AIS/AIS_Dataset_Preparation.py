@@ -13,7 +13,7 @@ if dataset_chosen == "WoW":
         turn_no = int(turn_no)
         assert len(ex_idx.split(":")) == 2
 
-        dialogue = [dialogue_and_passages_json[convo_no]['dialog'][i]['text'] for all i < turn_no]
+        dialogue = [dialogue_and_passages_json[convo_no]['dialog'][i]['text'] for i in range(turn_no) if i < turn_no]
         dialogue = (" ").join(dialogue)
 
         retrieved_passage = dialogue_and_passages_json[convo_no]['dialog'][turn_no]['checked_sentence']

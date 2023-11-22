@@ -153,6 +153,7 @@ if __name__ == '__main__':
     elif "ais" in document_filepath:
 
         documents = pd.read_csv(document_filepath, sep="\t")
+        documents['document'] = documents['document'].str.strip()
         documents = documents.sample(n=documents_sampled, random_state=43)
 
     else:

@@ -34,16 +34,17 @@ answer_relevance_scores = []
 answer_faithfulness_scores = []
 
 for evaluation_dataset in evaluation_datasets:
-    dataset = pd.read_csv(evaluation_dataset.replace("../", "../ColBERT-FM/"), sep="\t")
-    dataset = dataset[:2000]
-
-    def string_to_list(text):
-        return [text]
-
-    # Apply the function to the 'text_column' to convert it to a column of lists
-    dataset['contexts'] = dataset['Document'].apply(string_to_list)
 
     if not use_annotations_for_ranking:
+
+        dataset = pd.read_csv(evaluation_dataset.replace("../", "../ColBERT-FM/"), sep="\t")
+        dataset = dataset[:2000]
+
+        def string_to_list(text):
+            return [text]
+
+        # Apply the function to the 'text_column' to convert it to a column of lists
+        dataset['contexts'] = dataset['Document'].apply(string_to_list)
 
         dataset = Dataset.from_pandas(dataset)
         dataset = dataset.rename_column("Query", "question")
@@ -65,6 +66,7 @@ for evaluation_dataset in evaluation_datasets:
         #answer_faithfulness_scores.append(results['faithfulness'])
 
     else:
+        dataset = pd.read_csv(evaluation_dataset.replace("../", "../ColBERT-FM/"), sep="\t")
         dataset = dataset.dropna()
         assert len(dataset) == 300
         sampled_y_labels = dataset.sample(n=300, random_state=42)

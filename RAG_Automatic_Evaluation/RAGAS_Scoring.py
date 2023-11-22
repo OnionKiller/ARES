@@ -74,6 +74,8 @@ for evaluation_dataset in evaluation_datasets:
         sampled_y_labels = dataset.sample(n=300, random_state=42)
         context_subset = dataset.dropna(subset=["Context_Relevance_Label"]) 
         answer_subset = dataset.dropna(subset=["Answer_Relevance_Label"]) 
+        print("context_subset: " + str(len(context_subset)))
+        print("answer_subset: " + str(len(answer_subset)))
         context_relevance_prediction = sum(context_subset["Context_Relevance_Label"].tolist()) / len(sampled_y_labels)
         answer_relevance_prediction = sum(answer_subset["Answer_Relevance_Label"].tolist()) / len(sampled_y_labels)
         #print("context_relevance_prediction: " + str(context_relevance_prediction))

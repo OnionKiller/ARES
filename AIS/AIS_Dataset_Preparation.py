@@ -25,7 +25,7 @@ if dataset_chosen == "WoW":
     with open('datasets/WoW/test_random_split.json', 'r') as file:
         dialogue_and_passages_json = json.load(file)
 
-    wow_testing_data = pd.read_csv("ann_wow.csv")
+    wow_testing_data = pd.read_csv("AIS/ann_wow.csv")
 
     total_dialogues = []
     total_passages = []

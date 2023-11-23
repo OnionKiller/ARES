@@ -3,7 +3,7 @@ import json
 import pandas as pd
 from tqdm import tqdm
 
-dataset_chosen = "WoW" #"WoW"
+dataset_chosen = "CNN_DM" #"WoW"
 
 wow_saved_filename = "datasets/WoW/ann_wow_with_dialogue+retrieved_passages.tsv"
 wow_documents_filename = "datasets/WoW/ais_wow_train_documents.tsv"

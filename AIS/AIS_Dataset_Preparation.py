@@ -7,6 +7,9 @@ dataset_chosen = "WoW"
 wow_saved_filename = "datasets/WoW/ann_wow_with_dialogue+retrieved_passages.csv"
 wow_documents_filename = "datasets/WoW/ais_wow_train_documents.csv"
 
+cnn_dm_documents_filename = "datasets/CNN_DM/cnn_dm_train_documents.csv"
+
+
 if dataset_chosen == "WoW":
 
     def gather_dialogue_and_retrieved_passage(ex_idx):
@@ -50,20 +53,55 @@ if dataset_chosen == "WoW":
         train_passages_json = json.load(file)
 
     total_passages_retrieved = []
-    total_passages_retrieved_set = set()
     for row in tqdm(range(len(train_passages_json))):
         for dialogue_passage in range(len(train_passages_json[row]['dialog'])):
             for retrieved_passage in train_passages_json[row]['dialog'][dialogue_passage]['retrieved_passages']:
                 for current_passage_retrieved in list(retrieved_passage.values())[0]:
-                    if current_passage_retrieved not in total_passages_retrieved_set:
-                        total_passages_retrieved.append(current_passage_retrieved)
-                        total_passages_retrieved_set.add(current_passage_retrieved)
+                    total_passages_retrieved.append(current_passage_retrieved)
 
     documents = pd.DataFrame(total_passages_retrieved, columns=["document"])
     documents.to_csv(wow_documents_filename, sep="\t")
     print("Saved file to: " + wow_documents_filename)
 
     #breakpoint()
+
+elif dataset_chosen == "cnn_dm":
+
+    from datasets import load_dataset
+    dataset = load_dataset("cnn_dailymail", '3.0.0')['train']
+    dataset = dataset.set_index("id")
+
+    cnn_dm_testing_data = pd.read_csv("AIS/ann_cnn_dm.csv")
+
+    articles = []
+    for row in range(len(cnn_dm_testing_data)):
+        retrieved_article = dataset[cnn_dm_testing_data.iloc[row]['doc-url-hash']]
+        articles.append(retrieved_article['article'])
+
+    cnn_dm_testing_data.to_csv(cnn_dm_documents_filename, sep="\t")
+    print("Saved file to: " + cnn_dm_documents_filename)
+
+
+
+    
+    """import json
+
+    with open('datasets/finished_files/test.bin', 'rb') as file:
+        binary_data = file.read()
+
+
+    json_string = binary_data.decode('utf-8')
+
+    import cPickle
+    import cPickle as pickle
+    import struct
+
+    with open('datasets/finished_files/chunked/train_167.bin', 'rb') as file:
+        #binary_data = file.readlines()
+        binary_data = file.read()
+        #binary_data = pickle.load(file.read())
+
+    loaded_data = struct.unpack(binary_data)"""
     
 
     

@@ -70,13 +70,15 @@ elif dataset_chosen == "CNN_DM":
 
     from datasets import load_dataset
     dataset = load_dataset("cnn_dailymail", '3.0.0')['train']
-    dataset = dataset.set_index("id")
+    #dataset = dataset.set_index("id")
 
     cnn_dm_testing_data = pd.read_csv("AIS/ann_cnn_dm.csv")
 
     articles = []
     for row in range(len(cnn_dm_testing_data)):
-        retrieved_article = dataset[cnn_dm_testing_data.iloc[row]['doc-url-hash']]
+        #retrieved_article = dataset[cnn_dm_testing_data.iloc[row]['doc-url-hash']]
+        retrieved_article = dataset.filter(lambda example: example['id'] == cnn_dm_testing_data.iloc[row]['doc-url-hash'])
+        assert len(retrieved_article) == 1
         articles.append(retrieved_article['article'])
 
     cnn_dm_testing_data.to_csv(cnn_dm_documents_filename, sep="\t")

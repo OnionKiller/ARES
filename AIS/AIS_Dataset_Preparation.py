@@ -3,7 +3,8 @@ import json
 import pandas as pd
 from tqdm import tqdm
 
-dataset_chosen = "WoW"
+dataset_chosen = "CNN_DM" #"WoW"
+
 wow_saved_filename = "datasets/WoW/ann_wow_with_dialogue+retrieved_passages.csv"
 wow_documents_filename = "datasets/WoW/ais_wow_train_documents.csv"
 
@@ -65,7 +66,7 @@ if dataset_chosen == "WoW":
 
     #breakpoint()
 
-elif dataset_chosen == "cnn_dm":
+elif dataset_chosen == "CNN_DM":
 
     from datasets import load_dataset
     dataset = load_dataset("cnn_dailymail", '3.0.0')['train']

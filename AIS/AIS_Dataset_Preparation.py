@@ -69,7 +69,7 @@ if dataset_chosen == "WoW":
 elif dataset_chosen == "CNN_DM":
 
     from datasets import load_dataset
-    dataset = load_dataset("cnn_dailymail", '1.0.0')['train']
+    dataset = load_dataset("cnn_dailymail", '3.0.0')['test']
     #dataset = dataset.set_index("id")
 
     cnn_dm_testing_data = pd.read_csv("AIS/ann_cnn_dm.csv")

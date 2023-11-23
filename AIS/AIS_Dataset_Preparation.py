@@ -3,12 +3,13 @@ import json
 import pandas as pd
 from tqdm import tqdm
 
-dataset_chosen = "CNN_DM" #"WoW"
+dataset_chosen = "WoW" #"WoW"
 
-wow_saved_filename = "datasets/WoW/ann_wow_with_dialogue+retrieved_passages.csv"
-wow_documents_filename = "datasets/WoW/ais_wow_train_documents.csv"
+wow_saved_filename = "datasets/WoW/ann_wow_with_dialogue+retrieved_passages.tsv"
+wow_documents_filename = "datasets/WoW/ais_wow_train_documents.tsv"
 
-cnn_dm_documents_filename = "datasets/CNN_DM/cnn_dm_train_documents.csv"
+cnn_dm_saved_filename = "datasets/CNN_DM/ann_cnn_dm_retrieved_passages.tsv"
+cnn_dm_documents_filename = "datasets/CNN_DM/cnn_dm_train_documents.tsv"
 
 
 if dataset_chosen == "WoW":
@@ -87,7 +88,13 @@ elif dataset_chosen == "CNN_DM":
             print("Articles Found: " + str(len(retrieved_article)))
             assert False
 
-    cnn_dm_testing_data.to_csv(cnn_dm_documents_filename, sep="\t")
+    cnn_dm_testing_data.to_csv(cnn_dm_saved_filename, sep="\t")
+    print("Saved file to: " + cnn_dm_saved_filename)
+
+    #######################################
+
+    documents = pd.DataFrame(articles, columns=["document"])
+    documents.to_csv(cnn_dm_documents_filename, sep="\t")
     print("Saved file to: " + cnn_dm_documents_filename)
 
 

@@ -77,7 +77,7 @@ elif dataset_chosen == "CNN_DM":
     articles = []
     for row in range(len(cnn_dm_testing_data)):
         #retrieved_article = dataset[cnn_dm_testing_data.iloc[row]['doc-url-hash']]
-        hashed_doc_url = cnn_dm_testing_data.igloc[row]['doc-url-hash']
+        hashed_doc_url = cnn_dm_testing_data.iloc[row]['doc-url-hash']
         retrieved_article = dataset.filter(lambda example: example['id'] == hashed_doc_url)
         try:
             assert len(retrieved_article) == 1

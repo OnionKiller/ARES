@@ -69,7 +69,7 @@ if dataset_chosen == "WoW":
 elif dataset_chosen == "CNN_DM":
 
     from datasets import load_dataset
-    dataset = load_dataset("cnn_dailymail", '3.0.0')['train']
+    dataset = load_dataset("cnn_dailymail", '1.0.0')['train']
     #dataset = dataset.set_index("id")
 
     cnn_dm_testing_data = pd.read_csv("AIS/ann_cnn_dm.csv")
@@ -77,9 +77,15 @@ elif dataset_chosen == "CNN_DM":
     articles = []
     for row in range(len(cnn_dm_testing_data)):
         #retrieved_article = dataset[cnn_dm_testing_data.iloc[row]['doc-url-hash']]
-        retrieved_article = dataset.filter(lambda example: example['id'] == cnn_dm_testing_data.iloc[row]['doc-url-hash'])
-        assert len(retrieved_article) == 1
-        articles.append(retrieved_article['article'])
+        hashed_doc_url = cnn_dm_testing_data.igloc[row]['doc-url-hash']
+        retrieved_article = dataset.filter(lambda example: example['id'] == hashed_doc_url)
+        try:
+            assert len(retrieved_article) == 1
+            articles.append(retrieved_article['article'])
+        except:
+            print("Could not find: " + hashed_doc_url)
+            print("Articles Found: " + str(len(retrieved_article)))
+            assert False
 
     cnn_dm_testing_data.to_csv(cnn_dm_documents_filename, sep="\t")
     print("Saved file to: " + cnn_dm_documents_filename)

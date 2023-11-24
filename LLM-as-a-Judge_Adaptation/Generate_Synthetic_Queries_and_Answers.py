@@ -154,7 +154,7 @@ if __name__ == '__main__':
 
         documents = pd.read_csv(document_filepath, sep="\t")
         documents['document'] = documents['document'].str.strip()
-        if len(documents) < 10000:
+        if len(documents) > 10000:
             documents = documents.sample(n=documents_sampled, random_state=43)
         else:
             documents = documents.sample(n=documents_sampled, random_state=43, replace=False)

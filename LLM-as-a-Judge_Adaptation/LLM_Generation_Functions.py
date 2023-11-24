@@ -20,7 +20,7 @@ import math
 
 #################################################################
 
-def generate_synthetic_query_llm_approach(document: str, prompt: str, length_of_fewshot_prompt: int, device, tokenizer, model, percentiles, for_fever_dataset=False, for_wow_dataset=False):
+def generate_synthetic_query_llm_approach(document: str, prompt: str, length_of_fewshot_prompt: int, device, tokenizer, model, percentiles, for_fever_dataset=False, for_wow_dataset=False, for_cnn_dm_dataset=False):
 
     synthetic_queries = []
 
@@ -29,6 +29,8 @@ def generate_synthetic_query_llm_approach(document: str, prompt: str, length_of_
         prompt_without_document += "Document: \nStatement: "
     elif for_wow_dataset:
         prompt_without_document += "Document: \nDialogue: "
+    elif for_cnn_dm_dataset:
+        prompt_without_document += "Document: "
     else:
         prompt_without_document += "Document: \nQuestion: "
     prompt_tokens_length = tokenizer.encode(prompt_without_document, return_tensors='pt').to(device).shape[1]
@@ -46,6 +48,8 @@ def generate_synthetic_query_llm_approach(document: str, prompt: str, length_of_
         prompt += "Statement: "
     elif for_wow_dataset:
         prompt += "Dialogue: "
+    elif for_cnn_dm_dataset:
+        prompt += ""
     else:
         prompt += "Question: "
 
@@ -53,6 +57,8 @@ def generate_synthetic_query_llm_approach(document: str, prompt: str, length_of_
 
     max_length = 32
     if for_wow_dataset:
+        max_length = 256
+    elif for_cnn_dm_dataset:
         max_length = 256
 
     for percentile in percentiles:
@@ -75,13 +81,15 @@ def generate_synthetic_query_llm_approach(document: str, prompt: str, length_of_
 
 #################################################################
 
-def generate_answer_llm_approach(document: str, question: str, prompt: str, length_of_fewshot_prompt: int, device, tokenizer, model, for_fever_dataset=False, for_wow_dataset=False):
+def generate_answer_llm_approach(document: str, question: str, prompt: str, length_of_fewshot_prompt: int, device, tokenizer, model, for_fever_dataset=False, for_wow_dataset=False, for_cnn_dm_dataset=False):
 
     prompt_without_document = prompt + "Example " + str(length_of_fewshot_prompt + 1) +":\n"
     if for_fever_dataset:
         prompt_without_document += "Document: \nStatement: \nAnswer: "
     elif for_wow_dataset:
         prompt_without_document += "Document: \nDialogue: \nResponse: "
+    elif for_cnn_dm_dataset:
+        prompt_without_document += "Document: \nSummary: "
     else:
         prompt_without_document += "Document: \nQuestion: \nAnswer: "
     prompt_tokens_length = tokenizer.encode(prompt_without_document, return_tensors='pt').to(device).shape[1]
@@ -103,6 +111,8 @@ def generate_answer_llm_approach(document: str, question: str, prompt: str, leng
     elif for_wow_dataset:
         prompt += "Dialogue: " + question + "\n"
         prompt += "Response: " 
+    elif for_cnn_dm_dataset:
+        prompt += "Summary: "
     else:
         prompt += "Question: " + question + "\n"
         prompt += "Answer: " 
@@ -255,7 +265,7 @@ def check_generated_answer(answer: str):
     return "Yes"
 
 def generate_contradictory_answer_examples(queries_dataset, number_of_contradictory_answers_to_generate: int, few_shot_examples_for_contradictory_answers=None, 
-                                           device=None, tokenizer=None, model=None, for_fever_dataset=None, for_wow_dataset=None):
+                                           device=None, tokenizer=None, model=None, for_fever_dataset=None, for_wow_dataset=None, for_cnn_dm_dataset=None):
 
     def remove_problematic_contradictory_phrases(text):
         if text is None:
@@ -282,7 +292,7 @@ def generate_contradictory_answer_examples(queries_dataset, number_of_contradict
         if few_shot_examples_for_contradictory_answers is None:
             contradictory_answer_generated = generate_contradictory_answer_from_context(queries_dataset_copy.iloc[i]['document'], queries_dataset_copy.iloc[i]['synthetic_query'])
         else:
-            contradictory_answer_generated = generate_contradictory_answer_llm_approach(queries_dataset_copy.iloc[i]['document'], queries_dataset_copy.iloc[i]['synthetic_query'], few_shot_examples_for_contradictory_answers, device, tokenizer, model, for_fever_dataset=for_fever_dataset, for_wow_dataset=for_wow_dataset)
+            contradictory_answer_generated = generate_contradictory_answer_llm_approach(queries_dataset_copy.iloc[i]['document'], queries_dataset_copy.iloc[i]['synthetic_query'], few_shot_examples_for_contradictory_answers, device, tokenizer, model, for_fever_dataset=for_fever_dataset, for_wow_dataset=for_wow_dataset, for_cnn_dm_dataset=for_cnn_dm_dataset)
 
         contradictory_answer_generated = remove_problematic_contradictory_phrases(contradictory_answer_generated)
 
@@ -332,13 +342,15 @@ def generate_contradictory_answer_examples(queries_dataset, number_of_contradict
 
 #################################################
 
-def generate_contradictory_answer_llm_approach(document: str, question: str, prompt: str, device, tokenizer, model, for_fever_dataset=False, for_wow_dataset=False):
+def generate_contradictory_answer_llm_approach(document: str, question: str, prompt: str, device, tokenizer, model, for_fever_dataset=False, for_wow_dataset=False, for_cnn_dm_dataset=False):
 
     prompt_without_document = prompt + "Example " + str(prompt.count("Example") + 1) +":\n"
     if for_fever_dataset:
         prompt_without_document += "Document: \nStatement: \nIncorrect Answer: "
     elif for_wow_dataset:
         prompt_without_document += "Document: \nDialogue: \nIncorrect Response: "
+    elif for_cnn_dm_dataset:
+        prompt_without_document += "Document: \nSummary: "
     else:
         prompt_without_document += "Document: \nQuestion: \nIncorrect Answer: "
     prompt_tokens_length = tokenizer.encode(prompt_without_document, return_tensors='pt').to(device).shape[1]
@@ -360,6 +372,9 @@ def generate_contradictory_answer_llm_approach(document: str, question: str, pro
     elif for_wow_dataset:
         prompt += "Dialogue: " + question + "\n"
         prompt += "Incorrect Response: " 
+    elif for_cnn_dm_dataset:
+        #prompt += "Question: " + question + "\n"
+        prompt += "Incorrect Summary: "
     else:
         prompt += "Question: " + question + "\n"
         prompt += "Incorrect Answer: " 

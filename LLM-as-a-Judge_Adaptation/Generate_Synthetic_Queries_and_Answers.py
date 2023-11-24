@@ -73,6 +73,9 @@ if __name__ == '__main__':
     for_wow_dataset = False
     if "wow" in document_filepath.lower():
         for_wow_dataset = True
+    for_cnn_dm_dataset = False
+    if "cnn_dm" in document_filepath.lower() or "CNN_DM" in document_filepath.lower():
+        for_cnn_dm_dataset = True
 
     regenerate_synth_questions = True
     regenerate_answers = True
@@ -117,6 +120,7 @@ if __name__ == '__main__':
     print("lower_bound_for_negatives: " + str(lower_bound_for_negatives))
     print("for_fever_dataset: " + str(for_fever_dataset))
     print("for_wow_dataset: " + str(for_wow_dataset))
+    print("for_cnn_dm_dataset: " + str(for_cnn_dm_dataset))
     print("------------------------------------------------------------")
 
     #################################################
@@ -192,6 +196,9 @@ if __name__ == '__main__':
             few_shot_examples += "Statement: " + few_shot_prompt.iloc[row]['Query'] + "\n\n"
         elif for_wow_dataset:
             few_shot_examples += "Dialogue: " + few_shot_prompt.iloc[row]['Query'] + "\n\n"
+        elif for_cnn_dm_dataset:
+            #few_shot_examples = "Question: " + few_shot_prompt.iloc[row]['Query'] + "\n\n"
+            few_shot_examples = few_shot_examples
         else:
             few_shot_examples += "Question: " + few_shot_prompt.iloc[row]['Query'] + "\n\n"
 
@@ -216,6 +223,9 @@ if __name__ == '__main__':
             elif for_wow_dataset:
                 few_shot_examples_for_contradictory_answers += "Dialogue: " + few_shot_prompt_for_contradictory_answers.iloc[row]['Query'] + "\n"
                 few_shot_examples_for_contradictory_answers += "Incorrect Response: " + few_shot_prompt_for_contradictory_answers.iloc[row]['Contradictory_Answer'] + "\n\n"
+            elif for_cnn_dm_dataset:
+                #few_shot_examples_for_contradictory_answers += "Question: " + few_shot_prompt_for_contradictory_answers.iloc[row]['Query'] + "\n"
+                few_shot_examples_for_contradictory_answers += "Incorrect Summary: " + few_shot_prompt_for_contradictory_answers.iloc[row]['Contradictory_Answer'] + "\n\n"
             else:
                 few_shot_examples_for_contradictory_answers += "Question: " + few_shot_prompt_for_contradictory_answers.iloc[row]['Query'] + "\n"
                 few_shot_examples_for_contradictory_answers += "Incorrect Answer: " + few_shot_prompt_for_contradictory_answers.iloc[row]['Contradictory_Answer'] + "\n\n"
@@ -240,6 +250,9 @@ if __name__ == '__main__':
         elif for_wow_dataset:
             answer_gen_few_shot_examples += "Dialogue: " + answer_gen_few_shot_prompt.iloc[row]['Query'] + "\n"
             answer_gen_few_shot_examples += "Response: " + answer_gen_few_shot_prompt.iloc[row]['Answer'] + "\n\n"
+        elif for_cnn_dm_dataset:
+            #answer_gen_few_shot_examples += "Question: " + answer_gen_few_shot_prompt.iloc[row]['Query'] + "\n"
+            answer_gen_few_shot_examples += "Summary: " + answer_gen_few_shot_prompt.iloc[row]['Answer'] + "\n\n"
         else:
             answer_gen_few_shot_examples += "Question: " + answer_gen_few_shot_prompt.iloc[row]['Query'] + "\n"
             answer_gen_few_shot_examples += "Answer: " + answer_gen_few_shot_prompt.iloc[row]['Answer'] + "\n\n"
@@ -256,16 +269,22 @@ if __name__ == '__main__':
     print(documents.head())
 
     if regenerate_synth_questions:
-        print("Beginning synthetic query generation!")
-        tqdm.pandas(desc="Generating synthetic queries...", total=documents.shape[0])
-        if flan_approach:
-            documents["synthetic_query"] = documents.progress_apply(lambda x: generate_synthetic_query_llm_approach(x["document"], few_shot_examples, length_of_fewshot_prompt, device, tokenizer, model, percentiles, for_fever_dataset=for_fever_dataset, for_wow_dataset=for_wow_dataset), axis=1)
+        if for_cnn_dm_dataset == False:
+            print("Beginning synthetic query generation!")
+            tqdm.pandas(desc="Generating synthetic queries...", total=documents.shape[0])
+            if flan_approach:
+                documents["synthetic_query"] = documents.progress_apply(lambda x: generate_synthetic_query_llm_approach(x["document"], few_shot_examples, length_of_fewshot_prompt, device, tokenizer, model, percentiles, for_fever_dataset=for_fever_dataset, for_wow_dataset=for_wow_dataset, for_cnn_dm_dataset=for_cnn_dm_dataset), axis=1)
+            else:
+                documents["synthetic_query"] = documents.progress_apply(lambda x: generate_synthetic_query_openai_approach(x["document"], synthetic_query_prompt, few_shot_examples, question_temperatures, length_of_fewshot_prompt), axis=1)
+            documents = documents.explode("synthetic_query", ignore_index=True)
+            documents = documents.drop_duplicates(subset=['synthetic_query'])
+            documents.to_csv(synthetic_queries_filename, index=False, sep="\t")
+            print("Saved synthetic queries to: " + synthetic_queries_filename)
         else:
-            documents["synthetic_query"] = documents.progress_apply(lambda x: generate_synthetic_query_openai_approach(x["document"], synthetic_query_prompt, few_shot_examples, question_temperatures, length_of_fewshot_prompt), axis=1)
-        documents = documents.explode("synthetic_query", ignore_index=True)
-        documents = documents.drop_duplicates(subset=['synthetic_query'])
-        documents.to_csv(synthetic_queries_filename, index=False, sep="\t")
-        print("Saved synthetic queries to: " + synthetic_queries_filename)
+            documents["synthetic_query"] = ["" for _ in range(len(documents))]
+            documents.to_csv(synthetic_queries_filename, index=False, sep="\t")
+            print("Saved synthetic queries to: " + synthetic_queries_filename)
+
 
     #################################################
 
@@ -280,7 +299,7 @@ if __name__ == '__main__':
         
         tqdm.pandas(desc="Generating answers...", total=synth_queries.shape[0])
         if flan_approach:
-            synth_queries["generated_answer"] = synth_queries.progress_apply(lambda x: generate_answer_llm_approach(x["document"], x["synthetic_query"], answer_gen_few_shot_examples, length_of_fewshot_prompt_answer_gen, device, tokenizer, model, for_fever_dataset=for_fever_dataset, for_wow_dataset=for_wow_dataset), axis=1)
+            synth_queries["generated_answer"] = synth_queries.progress_apply(lambda x: generate_answer_llm_approach(x["document"], x["synthetic_query"], answer_gen_few_shot_examples, length_of_fewshot_prompt_answer_gen, device, tokenizer, model, for_fever_dataset=for_fever_dataset, for_wow_dataset=for_wow_dataset, for_cnn_dm_dataset=for_cnn_dm_dataset), axis=1)
         else:
             synth_queries["generated_answer"] = synth_queries.progress_apply(lambda x: generate_answer_from_context(x["document"], x["synthetic_query"]), axis=1)
         synth_queries.to_csv(synthetic_queries_filename, index=False, sep="\t")
@@ -292,7 +311,7 @@ if __name__ == '__main__':
         synth_queries["Answer_Relevance_Label"] = [check_generated_answer(synth_queries.iloc[i]['generated_answer']) for i in range(len(synth_queries))]
         print("Generating contradictory answers!")
         if generate_contradictory_answers_with_flan:
-            synth_queries = generate_contradictory_answer_examples(synth_queries, int(len(synth_queries) * number_of_contradictory_answers_added_ratio), few_shot_examples_for_contradictory_answers=few_shot_examples_for_contradictory_answers, device=device, tokenizer=tokenizer, model=model, for_fever_dataset=for_fever_dataset, for_wow_dataset=for_wow_dataset)
+            synth_queries = generate_contradictory_answer_examples(synth_queries, int(len(synth_queries) * number_of_contradictory_answers_added_ratio), few_shot_examples_for_contradictory_answers=few_shot_examples_for_contradictory_answers, device=device, tokenizer=tokenizer, model=model, for_fever_dataset=for_fever_dataset, for_wow_dataset=for_wow_dataset, for_cnn_dm_dataset=for_cnn_dm_dataset)
         else:
             synth_queries = generate_contradictory_answer_examples(synth_queries, int(len(synth_queries) * number_of_contradictory_answers_added_ratio))
         synth_queries.to_csv(synthetic_queries_filename, index=False, sep="\t")
@@ -307,7 +326,7 @@ if __name__ == '__main__':
     print(len(synth_queries))
     print(synth_queries.head())
 
-    if regenerate_embeddings:
+    if regenerate_embeddings and for_cnn_dm_dataset == False:
         print("Generating index and negatives!")
         documentation_index = generate_index(synth_queries)
         synth_queries = filter_synthetic_queries(synth_queries, documentation_index)

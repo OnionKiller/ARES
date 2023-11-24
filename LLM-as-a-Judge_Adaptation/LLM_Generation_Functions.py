@@ -17,6 +17,7 @@ import re
 import random
 import math
 
+
 #################################################################
 
 def generate_synthetic_query_llm_approach(document: str, prompt: str, length_of_fewshot_prompt: int, device, tokenizer, model, percentiles, for_fever_dataset=False, for_wow_dataset=False):

@@ -15,6 +15,7 @@ import numpy as np
 import random
 import pdb
 
+
 #################################################
 
 def get_embedding(text, model="text-embedding-ada-002"):

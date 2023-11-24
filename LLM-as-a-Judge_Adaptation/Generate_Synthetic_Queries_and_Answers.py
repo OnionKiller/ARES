@@ -281,7 +281,7 @@ if __name__ == '__main__':
             documents.to_csv(synthetic_queries_filename, index=False, sep="\t")
             print("Saved synthetic queries to: " + synthetic_queries_filename)
         else:
-            documents["synthetic_query"] = ["" for _ in range(len(documents))]
+            documents["synthetic_query"] = ["Summarize the given document" for _ in range(len(documents))]
             documents.to_csv(synthetic_queries_filename, index=False, sep="\t")
             print("Saved synthetic queries to: " + synthetic_queries_filename)
 

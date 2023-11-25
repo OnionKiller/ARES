@@ -75,11 +75,11 @@ elif dataset_chosen == "CNN_DM":
 
     cnn_dm_testing_data = pd.read_csv("AIS/ann_cnn_dm.csv")
     print("Length of CNN_DM Examples Overall: " + str(len(cnn_dm_testing_data)))
-    cnn_dm_testing_data = cnn_dm_testing_data.filter(lambda example: example['Q1'] == "Yes, I understand it.")
+    cnn_dm_testing_data = cnn_dm_testing_data[cnn_dm_testing_data['Q1'] == "Yes, I understand it."]
     print("Length of CNN_DM Examples with Understandable Summaries: " + str(len(cnn_dm_testing_data)))
 
     articles = []
-    attribution_label = []
+    attribution_labels = []
 
     for row in range(len(cnn_dm_testing_data)):
         #retrieved_article = dataset[cnn_dm_testing_data.iloc[row]['doc-url-hash']]
@@ -94,12 +94,17 @@ elif dataset_chosen == "CNN_DM":
             assert False
 
         if cnn_dm_testing_data.iloc[row]['Q2'] == "Yes, fully attributable.":
-            attribution_label.append(1)
+            attribution_labels.append(1)
+        else:
+            attribution_labels.append(0)
 
+    print("attribution_labels")
+    print(attribution_labels.count(1))
+    print(attribution_labels.count(0))
     
     cnn_dm_testing_data['Question'] = ["" for _ in range(len(articles))]
     cnn_dm_testing_data['Document'] = articles
-    cnn_dm_testing_data['Answer_Faithfulness_Label'] = ["" for _ in range(len(articles))]
+    cnn_dm_testing_data['Answer_Faithfulness_Label'] = attribution_labels
 
     cnn_dm_testing_data.to_csv(cnn_dm_saved_filename, sep="\t")
     print("Saved file to: " + cnn_dm_saved_filename)

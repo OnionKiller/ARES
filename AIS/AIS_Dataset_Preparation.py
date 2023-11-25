@@ -102,7 +102,7 @@ elif dataset_chosen == "CNN_DM":
     print(attribution_labels.count(1))
     print(attribution_labels.count(0))
     
-    cnn_dm_testing_data['Question'] = ["" for _ in range(len(articles))]
+    cnn_dm_testing_data['Query'] = ["" for _ in range(len(articles))]
     cnn_dm_testing_data['Document'] = articles
     cnn_dm_testing_data['Answer'] = cnn_dm_testing_data['output']
     cnn_dm_testing_data['Answer_Faithfulness_Label'] = attribution_labels

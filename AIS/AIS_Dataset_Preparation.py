@@ -105,6 +105,7 @@ elif dataset_chosen == "CNN_DM":
     cnn_dm_testing_data['Query'] = [" " for _ in range(len(articles))]
     cnn_dm_testing_data['Document'] = articles
     cnn_dm_testing_data['Answer'] = cnn_dm_testing_data['output']
+    cnn_dm_testing_data['Context_Relevance_Label'] = ["1" for _ in range(len(articles))]
     cnn_dm_testing_data['Answer_Faithfulness_Label'] = attribution_labels
 
     cnn_dm_testing_data.to_csv(cnn_dm_saved_filename, sep="\t")

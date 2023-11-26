@@ -36,7 +36,7 @@ def get_embedding(text, model="text-embedding-ada-002"):
 
 def generate_gpt_answer(query: str, documents: str, model_choice: str):
     #time.sleep(1)
-    user_prompt += "Using the information in the following document, answer the given question:\n\n"
+    user_prompt = "Using the information in the following document, answer the given question:\n\n"
     user_prompt += "Question: " + query + "\n"
     user_prompt += "Document: " + (" ").join(documents) + "\n"
     user_prompt += "Answer: "

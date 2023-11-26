@@ -188,6 +188,15 @@ for dataset in datasets:
         evaluation_dataset_copy['Context_Relevance_Label'] = context_relevance_labels
         evaluation_dataset_copy['Answer_Faithfulness_Label'] = answer_faithfulness_labels
         evaluation_dataset_copy['Answer_Relevance_Label'] = answer_relevance_labels
+
+        print("Label Distributions:")
+        print(context_relevance_labels.count(1))
+        print(context_relevance_labels.count(0))
+        print(answer_faithfulness_labels.count(1))
+        print(answer_faithfulness_labels.count(0))
+        print(answer_relevance_labels.count(1))
+        print(answer_relevance_labels.count(0))
+
         saved_filename = RAG_systems_save_folder + system[0] + "_" + system[1] + "_" + dataset + ".tsv"
         evaluation_dataset_copy.to_csv(saved_filename, sep="\t")
         print("Saved file: " + saved_filename)

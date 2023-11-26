@@ -175,6 +175,7 @@ for system in RAG_systems:
             else:
                 context_relevance_label = 0
             
+            breakpoint()
             answer_faithfulness_label, answer_relevance_label = evaluate_llm_generation(system_output, evaluation_dataset.iloc[row]['Answer'])
 
             context_relevance_labels.append(context_relevance_label)

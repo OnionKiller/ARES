@@ -139,6 +139,16 @@ class RAG_System:
             dataframe = Dataset.from_pandas(dataframe)
             dataframe.add_faiss_index(column="embeddings")
             self.retriever = dataframe
+        elif self.retriever_selection == "facebook/rag-sequence-nq":
+            dataframe = cfg[2].drop_duplicates(subset="Document")
+            tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
+            dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
+            dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
+            assert len(cfg[2]) == len(dataframe)
+            dataframe = Dataset.from_pandas(dataframe)
+            dataframe.add_faiss_index(column="embeddings")
+            breakpoint()
+            self.retriever = dataframe
 
     
     def retrieve_documents(self, query: str, documents, top_k=1):
@@ -196,8 +206,8 @@ top_k = 1
 evaluation_cutoff = 100
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"]]
-#RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
+#RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
+RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
 
 """RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"],
                ["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
@@ -232,6 +242,13 @@ for dataset in datasets:
                 retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], evaluation_dataset['Document'].tolist())
                 system_output = evaluated_rag_system.generate_output(evaluation_dataset.iloc[row]['Query'], retrieved_documents)
 
+                if evaluation_dataset.iloc[row]['Document'] in retrieved_documents[:top_k]:
+                    context_relevance_label = 1
+                else:
+                    context_relevance_label = 0
+                
+                answer_faithfulness_label, answer_relevance_label = evaluate_llm_generation(system_output, evaluation_dataset.iloc[row]['Answer'])
+
                 print("Query: " + str(evaluation_dataset.iloc[row]['Query']))
                 print("retrieved_documents: " + str(retrieved_documents))
                 print("system_output: " + str(system_output))
@@ -239,12 +256,10 @@ for dataset in datasets:
                 print("Correct Document: " + str(evaluation_dataset.iloc[row]['Document']))
                 print("Correct Answer: " + str(evaluation_dataset.iloc[row]['Answer']))
 
-                if evaluation_dataset.iloc[row]['Document'] in retrieved_documents[:top_k]:
-                    context_relevance_label = 1
-                else:
-                    context_relevance_label = 0
-                
-                answer_faithfulness_label, answer_relevance_label = evaluate_llm_generation(system_output, evaluation_dataset.iloc[row]['Answer'])
+                print("context_relevance_label: " + str(context_relevance_label))
+                print("answer_faithfulness_label: " + str(answer_faithfulness_label))
+                print("answer_relevance_label: " + str(answer_relevance_label))
+                print("-------------------------------------------------")
 
                 context_relevance_labels.append(context_relevance_label)
                 answer_faithfulness_labels.append(answer_faithfulness_label)

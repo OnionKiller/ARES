@@ -186,9 +186,6 @@ for dataset in datasets:
         system_outputs = []
         for row in tqdm(range(len(evaluation_dataset))):
             
-            if system[0] == "facebook/rag-sequence-nq":
-
-            else:
                 retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], evaluation_dataset['Document'].tolist())
                 system_output = evaluated_rag_system.generate_output(evaluation_dataset.iloc[row]['Query'], retrieved_documents)
 

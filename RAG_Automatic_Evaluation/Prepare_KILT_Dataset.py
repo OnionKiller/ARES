@@ -61,7 +61,8 @@ dataset_choices = ["nq", "hotpotqa", "wow", "fever"] #"nq", "hotpotqa", "wow", "
 process_wikipedia = False
 gather_full_wikipedia_articles = False
 
-positive_negative_ratios = [0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9]
+positive_negative_ratios = [1.0]
+#positive_negative_ratios = [0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9]
 #positive_negative_ratios = [0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7]
 
 ####################################################################

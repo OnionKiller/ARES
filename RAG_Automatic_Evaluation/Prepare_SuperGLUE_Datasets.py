@@ -19,9 +19,10 @@ import os
 
 ####################################################################
 
-dataset_choices = ["multirc"] #"record", "rte", "boolq", "multirc"
+dataset_choices = ["record"] #"record", "rte", "boolq", "multirc"
 
-positive_negative_ratios = [0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9]
+positive_negative_ratios = [1.0]
+#positive_negative_ratios = [0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9]
 
 ####################################################################
 

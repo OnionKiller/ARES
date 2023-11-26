@@ -49,7 +49,10 @@ def combine_query_document(query: str, document: str, answer=None):
         return query + " | " + cleaned_document
     else:
         try:
-            return query + " | " + cleaned_document + " | " + answer
+            if "CNN_DM" in classification_dataset or "cnn_dm" in classification_dataset:
+                return cleaned_document + " | " + answer
+            else:
+                return query + " | " + cleaned_document + " | " + answer
         except:
             print("Error with combine_query_document")
             print("Query: " + str(query))

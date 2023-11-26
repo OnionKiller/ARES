@@ -179,10 +179,9 @@ class RAG_System:
             user_prompt += "Question: " + query + "\n"
             user_prompt += "Document: " + (" ").join(retrieved_documents) + "\n"
             formatted_example = self.PROMPT_FOR_GENERATION_FORMAT.format(instruction=user_prompt)
-            breakpoint()
             with torch.autocast('cuda', dtype=torch.bfloat16):
                 generated_text = self.pipe(formatted_example, max_new_tokens=100, do_sample=True, use_cache=True)[0]['generated_text']
-                breakpoint()
+                generated_text = generated_text.split("Response:")[1]
                 return generated_text
         else:
             raise ValueError("Not implemented")
@@ -192,15 +191,17 @@ class RAG_System:
 
 ######################################################################
 
-datasets = ["nq", "fever", "wow"]
+datasets = ["nq"] #, "fever", "wow"]
 top_k = 1
 evaluation_cutoff = 5
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"],
+RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"]]
+#RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
+"""RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"],
                ["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
-               ["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"]]#,
-               #["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"]]
+               ["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"],
+               ["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"]]"""
 
 RAG_systems_save_folder = "RAG_Systems_Comparison/"
 

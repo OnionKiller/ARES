@@ -137,6 +137,7 @@ class RAG_System:
 
 datasets = ["nq", "fever", "record"]
 top_k = 1
+evaluation_cutoff = 10
 
 # LLM + Retriever tuples of each RAG system to be evaluated
 RAG_systems = [["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"]]
@@ -152,7 +153,8 @@ for system in RAG_systems:
             evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")
         else:
             evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
-
+        
+        evaluation_dataset = evaluation_dataset[:evaluation_cutoff]
         system.append(evaluation_dataset)
 
         evaluated_rag_system = RAG_System(cfg=system)

@@ -167,7 +167,7 @@ for system in RAG_systems:
         system_outputs = []
         for row in tqdm(range(len(evaluation_dataset))):
             
-            retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], evaluation_dataset.iloc[row]['Document'])
+            retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], evaluation_dataset['Document'].tolist())
             system_output = evaluated_rag_system.generate_output(evaluation_dataset.iloc[row]['Query'], retrieved_documents)
 
             if evaluation_dataset.iloc[row]['Document'] in retrieved_documents[:top_k]:

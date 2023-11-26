@@ -189,6 +189,10 @@ for dataset in datasets:
                 retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], evaluation_dataset['Document'].tolist())
                 system_output = evaluated_rag_system.generate_output(evaluation_dataset.iloc[row]['Query'], retrieved_documents)
 
+                print("Query: " + str(evaluation_dataset.iloc[row]['Query']))
+                print("retrieved_documents: " + str(retrieved_documents))
+                print("system_output: " + str(system_output))
+
                 if evaluation_dataset.iloc[row]['Document'] in retrieved_documents[:top_k]:
                     context_relevance_label = 1
                 else:
@@ -214,7 +218,7 @@ for dataset in datasets:
         print(answer_relevance_labels.count(1))
         print(answer_relevance_labels.count(0))
 
-        saved_filename = RAG_systems_save_folder + system[0] + "_" + system[1] + "_" + dataset + ".tsv"
+        saved_filename = RAG_systems_save_folder + system[0].replace("/","-") + "_" + system[1].replace("/","-") + "_" + dataset + ".tsv"
         evaluation_dataset_copy.to_csv(saved_filename, sep="\t")
         print("Saved file: " + saved_filename)
         RAG_evaluation_sets_collected.append(saved_filename)

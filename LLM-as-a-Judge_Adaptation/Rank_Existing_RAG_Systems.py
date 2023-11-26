@@ -119,7 +119,7 @@ class RAG_System:
         else:
             question_embedding = np.array(get_embedding(query)).astype(np.float32)
             scores, samples = self.retriever.get_nearest_examples("embeddings", question_embedding, k=top_k)
-            top_documents = samples["document"][:]
+            top_documents = samples["Document"][:]
             assert type(top_documents) == list 
             assert type(top_documents[0]) == str
             return top_documents

@@ -16,7 +16,7 @@ from sklearn.model_selection import train_test_split
 import re
 import random
 import math
-from transformers import RagTokenizer, RagRetriever, RagSequenceForGeneration 
+from transformers import RagTokenizer, RagRetriever, RagSequenceForGeneration, pipeline, AutoTokenizer, AutoConfig
 
 from rank_bm25 import BM25Okapi
 
@@ -94,6 +94,36 @@ class RAG_System:
             self.device = torch.device("cuda:0")
             self.model.to(self.device)
             self.model.eval()
+        elif self.generative_LLM_selection == "mosaicml/mpt-7b-instruct":
+            config = AutoConfig.from_pretrained(self.generative_LLM_selection, trust_remote_code=True)
+            config.attn_config['attn_impl'] = 'triton'
+            config.init_device = 'cuda:0' # For fast initialization directly on GPU!
+
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.generative_LLM_selection,
+                config=config,
+                torch_dtype=torch.bfloat16, # Load model weights in bfloat16
+                trust_remote_code=True
+            )
+            self.model.eval()
+            self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
+            self.pipe = pipeline('text-generation', model=self.model, tokenizer=self.tokenizer, device=config.init_device)
+
+            INSTRUCTION_KEY = "### Instruction:"
+            RESPONSE_KEY = "### Response:"
+            INTRO_BLURB = "Below is an instruction that describes a task. Write a response that appropriately completes the request."
+            self.PROMPT_FOR_GENERATION_FORMAT = """{intro}
+            {instruction_key}
+            {instruction}
+            {response_key}
+            """.format(
+                intro=INTRO_BLURB,
+                instruction_key=INSTRUCTION_KEY,
+                instruction="{instruction}",
+                response_key=RESPONSE_KEY,
+            )
+
+        ################################################
 
         if self.retriever_selection == "bm25":
             document_set = cfg[2]['Document'].tolist()
@@ -144,6 +174,16 @@ class RAG_System:
             generated = self.model.generate(input_ids=input_dict["input_ids"]) 
             llm_answer = self.tokenizer.batch_decode(generated, skip_special_tokens=True)[0]
             return llm_answer
+        elif self.generative_LLM_selection == "mosaicml/mpt-7b-instruct":
+            user_prompt = "Using the information in the following document, answer the given question:\n\n"
+            user_prompt += "Question: " + query + "\n"
+            user_prompt += "Document: " + (" ").join(retrieved_documents) + "\n"
+            formatted_example = self.PROMPT_FOR_GENERATION_FORMAT.format(instruction=user_prompt)
+            breakpoint()
+            with torch.autocast('cuda', dtype=torch.bfloat16):
+                generated_text = self.pipe(formatted_example, max_new_tokens=100, do_sample=True, use_cache=True)[0]['generated_text']
+                breakpoint()
+                return generated_text
         else:
             raise ValueError("Not implemented")
 
@@ -157,7 +197,8 @@ top_k = 1
 evaluation_cutoff = 5
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
+RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"],
+               ["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
                ["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"]]#,
                #["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"]]
 

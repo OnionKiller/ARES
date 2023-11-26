@@ -120,7 +120,7 @@ class RAG_System:
         elif self.retriever_selection == "facebook/rag-sequence-nq":
             input_dict = self.tokenizer.prepare_seq2seq_batch(query, return_tensors="pt").to(self.device)
             encoder_outputs = self.model(input_ids=input_dict["input_ids"]).question_encoder_last_hidden_state
-            outputs = self.retriever.retrieve(question_hidden_states=encoder_outputs.detach().numpy(), n_docs=top_k)
+            outputs = self.retriever.retrieve(question_hidden_states=encoder_outputs.cpu().detach().numpy(), n_docs=top_k)
             top_documents = outputs[2][0]['text']
             return top_documents
         elif "ada" in self.retriever_selection:

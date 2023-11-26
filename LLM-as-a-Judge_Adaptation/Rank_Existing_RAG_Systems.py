@@ -142,7 +142,7 @@ class RAG_System:
         elif self.retriever_selection == "facebook/rag-sequence-nq":
             dataframe = cfg[2].drop_duplicates(subset="Document")
             tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
-            dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
+            dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model="text-embedding-ada-002"))
             dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
             assert len(cfg[2]) == len(dataframe)
             dataframe = Dataset.from_pandas(dataframe)

@@ -148,10 +148,10 @@ RAG_systems_save_folder = "RAG_Systems_Comparison/"
 
 ######################################################################
 
-for system in RAG_systems:
+for dataset in datasets:
 
     RAG_evaluation_sets_collected = []
-    for dataset in datasets:
+    for system in RAG_systems:
 
         if dataset in ['nq', 'fever']:
             evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")

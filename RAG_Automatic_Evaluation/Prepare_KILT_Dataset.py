@@ -57,8 +57,9 @@ print("Finished loading KILT wiki!")
 
 ####################################################################
 
-dataset_choices = ["nq", "hotpotqa", "wow", "fever"] #"nq", "hotpotqa", "wow", "fever", 
-process_wikipedia = False
+#dataset_choices = ["nq", "hotpotqa", "wow", "fever"] #"nq", "hotpotqa", "wow", "fever", 
+dataset_choices = ["nq"]
+process_wikipedia = True
 gather_full_wikipedia_articles = False
 
 positive_negative_ratios = [1.0]

@@ -67,10 +67,10 @@ def evaluate_llm_generation(system_output: str, evaluation_set_answer: str):
     evaluation_set_terms += evaluation_set_answer.lower().split(" ")
 
     system_output = system_output.lower()
-    answer_found = False
+    answer_found = 0
     for term in evaluation_set_terms:
         if system_output.find(term) != -1:
-            answer_found = True 
+            answer_found = 1 
     
     return answer_found, answer_found
     
@@ -197,7 +197,7 @@ class RAG_System:
             user_prompt += "Document: " + (" ").join(retrieved_documents) + "\n"
             formatted_example = self.PROMPT_FOR_GENERATION_FORMAT.format(instruction=user_prompt)
             with torch.autocast('cuda', dtype=torch.bfloat16):
-                generated_text = self.pipe(formatted_example, max_new_tokens=100, do_sample=True, use_cache=True)[0]['generated_text']
+                generated_text = self.pipe(formatted_example, max_new_tokens=max_new_tokens, do_sample=True, use_cache=True)[0]['generated_text']
                 generated_text = generated_text.split("Response:")[1]
                 return generated_text
         else:
@@ -211,6 +211,7 @@ class RAG_System:
 datasets = ["nq"] #, "fever", "wow"]
 top_k = 1
 evaluation_cutoff = 100
+max_new_tokens = 32
 
 # LLM + Retriever tuples of each RAG system to be evaluated
 RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]

@@ -27,11 +27,11 @@ def get_embedding(text, model="text-embedding-ada-002"):
     #if len(text) > 50:
     #    text = (" ").join(text.split(" ")[:50])
     for _ in range(5):
-        #try:
+        try:
             return openai.Embedding.create(input = [text], model=model)['data'][0]['embedding']
-        #except:
-        #    print("Error generating embedding! Attempting again...")
-        #    time.sleep(30)
+        except:
+            print("Error generating embedding! Attempting again...")
+            time.sleep(30)
 
 #################################################
 
@@ -87,9 +87,41 @@ class RAG_System:
         self.generative_LLM_selection = cfg[0]
         self.retriever_selection = cfg[1]
 
+        ################################################
+
+        if self.retriever_selection == "bm25":
+            document_set = cfg[2]['Document'].tolist()
+            tokenized_documents = [doc.split() for doc in document_set]
+            bm25_index = BM25Okapi(tokenized_documents)
+            self.retriever = bm25_index
+        elif "ada" in self.retriever_selection:
+            dataframe = cfg[2].drop_duplicates(subset="Document")
+            tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
+            dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
+            dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
+            assert len(cfg[2]) == len(dataframe)
+            dataframe = Dataset.from_pandas(dataframe)
+            dataframe.add_faiss_index(column="embeddings")
+            self.retriever = dataframe
+        """elif self.retriever_selection == "facebook/rag-sequence-nq":
+            dataframe = cfg[2].drop_duplicates(subset="Document")
+            tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
+            dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model="text-embedding-ada-002"))
+            dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
+            assert len(cfg[2]) == len(dataframe)
+            dataframe = Dataset.from_pandas(dataframe)
+            dataframe.add_faiss_index(column="embeddings")
+            self.faiss_path = "faiss_indexes/" + self.retriever_selection.replace("/", "-") + "_" + dataset + ".faiss"
+            dataframe.save_faiss_index('embeddings', self.faiss_path)"""
+
+        ################################################
+
         if self.generative_LLM_selection == "facebook/rag-sequence-nq":
             self.tokenizer = RagTokenizer.from_pretrained("facebook/rag-sequence-nq") 
-            self.retriever = RagRetriever.from_pretrained("facebook/rag-sequence-nq", index_name="exact", use_dummy_dataset=True) 
+            self.retriever = RagRetriever.from_pretrained("facebook/rag-sequence-nq", 
+                                                          index_name="exact", 
+                                                          use_dummy_dataset=False,
+                                                          ) 
             self.model = RagSequenceForGeneration.from_pretrained("facebook/rag-sequence-nq", retriever=self.retriever) 
             self.device = torch.device("cuda:0")
             self.model.to(self.device)
@@ -124,31 +156,6 @@ class RAG_System:
             )
 
         ################################################
-
-        if self.retriever_selection == "bm25":
-            document_set = cfg[2]['Document'].tolist()
-            tokenized_documents = [doc.split() for doc in document_set]
-            bm25_index = BM25Okapi(tokenized_documents)
-            self.retriever = bm25_index
-        elif "ada" in self.retriever_selection:
-            dataframe = cfg[2].drop_duplicates(subset="Document")
-            tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
-            dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
-            dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
-            assert len(cfg[2]) == len(dataframe)
-            dataframe = Dataset.from_pandas(dataframe)
-            dataframe.add_faiss_index(column="embeddings")
-            self.retriever = dataframe
-        elif self.retriever_selection == "facebook/rag-sequence-nq":
-            dataframe = cfg[2].drop_duplicates(subset="Document")
-            tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
-            dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model="text-embedding-ada-002"))
-            dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
-            assert len(cfg[2]) == len(dataframe)
-            dataframe = Dataset.from_pandas(dataframe)
-            dataframe.add_faiss_index(column="embeddings")
-            breakpoint()
-            self.retriever = dataframe
 
     
     def retrieve_documents(self, query: str, documents, top_k=1):

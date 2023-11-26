@@ -150,6 +150,7 @@ RAG_systems_save_folder = "RAG_Systems_Comparison/"
 
 for system in RAG_systems:
 
+    RAG_evaluation_sets_collected = []
     for dataset in datasets:
 
         if dataset in ['nq', 'fever']:
@@ -190,6 +191,11 @@ for system in RAG_systems:
         saved_filename = RAG_systems_save_folder + system[0] + "_" + system[1] + "_" + dataset + ".tsv"
         evaluation_dataset_copy.to_csv(saved_filename, sep="\t")
         print("Saved file: " + saved_filename)
+        RAG_evaluation_sets_collected.append(saved_filename)
+
+    print("Dataset Finished: " + dataset)
+    print(RAG_evaluation_sets_collected)
+    print("----------------------------------------------------")
 
 
         

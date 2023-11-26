@@ -90,7 +90,7 @@ class RAG_System:
         if self.generative_LLM_selection == "facebook/rag-sequence-nq":
             self.tokenizer = RagTokenizer.from_pretrained("facebook/rag-sequence-nq") 
             self.retriever = RagRetriever.from_pretrained("facebook/rag-sequence-nq", index_name="exact", use_dummy_dataset=True) 
-            self.model = RagSequenceForGeneration.from_pretrained("facebook/rag-sequence-nq", retriever=retriever) 
+            self.model = RagSequenceForGeneration.from_pretrained("facebook/rag-sequence-nq", retriever=self.retriever) 
             self.device = torch.device("cuda:0")
             self.model.to(self.device)
             self.model.eval()

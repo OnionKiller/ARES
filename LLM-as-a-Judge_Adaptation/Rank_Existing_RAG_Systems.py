@@ -235,6 +235,7 @@ for dataset in datasets:
                 print("Query: " + str(evaluation_dataset.iloc[row]['Query']))
                 print("retrieved_documents: " + str(retrieved_documents))
                 print("system_output: " + str(system_output))
+                print("answer: " + str(evaluation_dataset.iloc[row]['Answer']))
 
                 if evaluation_dataset.iloc[row]['Document'] in retrieved_documents[:top_k]:
                     context_relevance_label = 1

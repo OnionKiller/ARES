@@ -2,6 +2,7 @@
 import json
 import pandas as pd
 from tqdm import tqdm
+from sklearn.model_selection import train_test_split
 
 dataset_chosen = "CNN_DM" #"WoW"
 
@@ -33,19 +34,48 @@ if dataset_chosen == "WoW":
         dialogue_and_passages_json = json.load(file)
 
     wow_testing_data = pd.read_csv("AIS/ann_wow.csv")
+    print("Length of WoW Examples Overall: " + str(len(wow_testing_data)))
+    wow_testing_data = wow_testing_data[wow_testing_data['Q1'] == "Yes, I understand it."]
+    print("Length of WoW Examples with Understandable Summaries: " + str(len(wow_testing_data)))
 
     total_dialogues = []
     total_passages = []
+    attribution_labels = []
     for row in tqdm(range(len(wow_testing_data))):
         dialogue, retrieved_passage = gather_dialogue_and_retrieved_passage(wow_testing_data.iloc[row]['ex-idx '])
         total_dialogues.append(dialogue)
         total_passages.append(retrieved_passage)
 
-    wow_testing_data['Dialogue'] = total_dialogues
-    wow_testing_data['Passage'] = total_passages
+        if wow_testing_data.iloc[row]['Q2'] == "Yes, fully attributable.":
+            attribution_labels.append(1)
+        else:
+            attribution_labels.append(0)
 
-    wow_testing_data.to_csv(wow_saved_filename, sep="\t")
-    print("Saved file to: " + wow_saved_filename)
+    #wow_testing_data['Dialogue'] = total_dialogues
+    #wow_testing_data['Passage'] = total_passages
+
+    print("attribution_labels")
+    print(attribution_labels.count(1))
+    print(attribution_labels.count(0))
+    
+    wow_testing_data['Query'] = total_dialogues
+    wow_testing_data['Document'] = total_passages
+    wow_testing_data['Answer'] = wow_testing_data['output']
+    wow_testing_data['Context_Relevance_Label'] = ["1" for _ in range(len(wow_testing_data))]
+    wow_testing_data['Answer_Faithfulness_Label'] = attribution_labels
+
+    wow_saved_filename_train = wow_saved_filename.replace(".tsv", "_train.tsv")
+    wow_saved_filename_test = wow_saved_filename.replace(".tsv", "_test.tsv")
+    wow_testing_data_train, wow_testing_data_test = train_test_split(wow_testing_data, test_size= 200 / len(wow_testing_data), random_state=42)
+
+    wow_testing_data_train.to_csv(wow_saved_filename_train, sep="\t")
+    print("Saved file to: " + wow_saved_filename_train)
+
+    wow_testing_data_test.to_csv(wow_saved_filename_test, sep="\t")
+    print("Saved file to: " + wow_saved_filename_test)
+
+    #wow_testing_data.to_csv(wow_saved_filename, sep="\t")
+    #print("Saved file to: " + wow_saved_filename)
 
     #breakpoint()
 
@@ -108,8 +138,20 @@ elif dataset_chosen == "CNN_DM":
     cnn_dm_testing_data['Context_Relevance_Label'] = ["1" for _ in range(len(articles))]
     cnn_dm_testing_data['Answer_Faithfulness_Label'] = attribution_labels
 
-    cnn_dm_testing_data.to_csv(cnn_dm_saved_filename, sep="\t")
-    print("Saved file to: " + cnn_dm_saved_filename)
+    #######################################
+
+    cnn_dm_saved_filename_train = cnn_dm_saved_filename.replace(".tsv", "_train.tsv")
+    cnn_dm_saved_filename_test = cnn_dm_saved_filename.replace(".tsv", "_test.tsv")
+    cnn_dm_testing_data_train, cnn_dm_testing_data_test = train_test_split(cnn_dm_testing_data, test_size= 200 / len(cnn_dm_testing_data), random_state=42)
+
+    cnn_dm_testing_data_train.to_csv(cnn_dm_saved_filename_train, sep="\t")
+    print("Saved file to: " + cnn_dm_saved_filename_train)
+
+    cnn_dm_testing_data_test.to_csv(cnn_dm_saved_filename_test, sep="\t")
+    print("Saved file to: " + cnn_dm_saved_filename_test)
+
+    #cnn_dm_testing_data.to_csv(cnn_dm_saved_filename, sep="\t")
+    #print("Saved file to: " + cnn_dm_saved_filename)
 
     #######################################
 

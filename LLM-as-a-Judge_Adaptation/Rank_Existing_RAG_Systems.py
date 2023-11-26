@@ -213,8 +213,8 @@ top_k = 1
 evaluation_cutoff = 100
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-#RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
-RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
+RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
+#RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
 
 """RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"],
                ["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],

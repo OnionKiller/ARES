@@ -167,15 +167,15 @@ for system in RAG_systems:
         system_outputs = []
         for row in tqdm(range(len(evaluation_dataset))):
             
-            retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset['Query'], evaluation_dataset['Document'])
-            system_output = evaluated_rag_system.generate_output(evaluation_dataset['Query'], retrieved_documents)
+            retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], evaluation_dataset.iloc[row]['Document'])
+            system_output = evaluated_rag_system.generate_output(evaluation_dataset.iloc[row]['Query'], retrieved_documents)
 
-            if evaluation_dataset['Document'] in retrieved_documents[:top_k]:
+            if evaluation_dataset.iloc[row]['Document'] in retrieved_documents[:top_k]:
                 context_relevance_label = 1
             else:
                 context_relevance_label = 0
             
-            answer_faithfulness_label, answer_relevance_label = evaluate_llm_generation(system_output, evaluation_dataset['Answer'])
+            answer_faithfulness_label, answer_relevance_label = evaluate_llm_generation(system_output, evaluation_dataset.iloc[row]['Answer'])
 
             context_relevance_labels.append(context_relevance_label)
             answer_faithfulness_labels.append(answer_faithfulness_label)

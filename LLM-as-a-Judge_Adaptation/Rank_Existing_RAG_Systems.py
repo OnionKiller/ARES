@@ -62,8 +62,6 @@ def generate_gpt_answer(query: str, documents: str, model_choice: str):
 
 def evaluate_llm_generation(system_output: str, evaluation_set_answer: str):
 
-    breakpoint()
-
     evaluation_set_terms = [evaluation_set_answer.lower()]
     evaluation_set_terms += evaluation_set_answer.lower().split(" ")
 
@@ -72,7 +70,8 @@ def evaluate_llm_generation(system_output: str, evaluation_set_answer: str):
     for term in evaluation_set_terms:
         if system_output.find(term) != -1:
             answer_found = True 
-    return answer_found
+    
+    return answer_found, answer_found
     
 
 #################################################
@@ -177,7 +176,6 @@ for system in RAG_systems:
             else:
                 context_relevance_label = 0
             
-            breakpoint()
             answer_faithfulness_label, answer_relevance_label = evaluate_llm_generation(system_output, evaluation_dataset.iloc[row]['Answer'])
 
             context_relevance_labels.append(context_relevance_label)

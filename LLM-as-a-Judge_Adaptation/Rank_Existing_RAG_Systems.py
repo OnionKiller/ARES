@@ -62,6 +62,8 @@ def generate_gpt_answer(query: str, documents: str, model_choice: str):
 
 def evaluate_llm_generation(system_output: str, evaluation_set_answer: str):
 
+    breakpoint()
+
     evaluation_set_terms = [evaluation_set_answer.lower()]
     evaluation_set_terms += evaluation_set_answer.lower().split(" ")
 

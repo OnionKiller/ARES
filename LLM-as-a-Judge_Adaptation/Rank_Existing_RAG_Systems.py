@@ -27,11 +27,11 @@ def get_embedding(text, model="text-embedding-ada-002"):
     #if len(text) > 50:
     #    text = (" ").join(text.split(" ")[:50])
     for _ in range(5):
-        try:
+        #try:
             return openai.Embedding.create(input = [text], model=model)['data'][0]['embedding']
-        except:
-            print("Error generating embedding! Attempting again...")
-            time.sleep(30)
+        #except:
+        #    print("Error generating embedding! Attempting again...")
+        #    time.sleep(30)
 
 #################################################
 

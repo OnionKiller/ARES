@@ -102,7 +102,7 @@ class RAG_System:
         elif "ada" in self.retriever_selection:
             dataframe = cfg[2].drop_duplicates(subset="Document")
             tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
-            dataframe['embeddings'] = dataframe["document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
+            dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
             dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
             assert len(cfg[2]) == len(dataframe)
             dataframe = Dataset.from_pandas(dataframe)
@@ -187,7 +187,7 @@ for system in RAG_systems:
         evaluation_dataset_copy['Context_Relevance_Label'] = context_relevance_labels
         evaluation_dataset_copy['Answer_Faithfulness_Label'] = answer_faithfulness_labels
         evaluation_dataset_copy['Answer_Relevance_Label'] = answer_relevance_labels
-        saved_filename = RAG_systems_save_folder + system[0] + "_" + system[1] + ".tsv"
+        saved_filename = RAG_systems_save_folder + system[0] + "_" + system[1] + "_" + dataset + ".tsv"
         evaluation_dataset_copy.to_csv(saved_filename, sep="\t")
         print("Saved file: " + saved_filename)
 

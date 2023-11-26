@@ -109,7 +109,7 @@ class RAG_System:
             self.retriever = dataframe
 
     
-    def retrieve_documents(self, query: str, documents: List[str], top_k=1) -> List[str]:
+    def retrieve_documents(self, query: str, documents, top_k=1):
         if self.retriever_selection == "bm25":
             top_documents = self.retriever.get_top_n(query.split(), documents, n=top_k)
             assert type(top_documents) == list 
@@ -124,9 +124,11 @@ class RAG_System:
             return top_documents
 
     
-    def generate_output(self, query: str, retrieved_documents: List[str], documents_to_use=1) -> str:
+    def generate_output(self, query: str, retrieved_documents, documents_to_use=1):
         if "gpt" in self.generative_LLM_selection:
-            return generate_gpt_answer(query, retrieved_documents[:documents_to_use], self.generative_LLM_selection)
+            llm_answer =  generate_gpt_answer(query, retrieved_documents[:documents_to_use], self.generative_LLM_selection)
+            assert type(llm_answer) == str 
+            return llm_answer
         elif self.generative_LLM_selection == "facebook/rag-sequence-nq":
             raise ValueError("Not implemented")
 

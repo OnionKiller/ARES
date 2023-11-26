@@ -16,6 +16,7 @@ from sklearn.model_selection import train_test_split
 import re
 import random
 import math
+from transformers import RagTokenizer, RagRetriever, RagSequenceForGeneration 
 
 from rank_bm25 import BM25Okapi
 
@@ -87,12 +88,12 @@ class RAG_System:
         self.retriever_selection = cfg[1]
 
         if self.generative_LLM_selection == "facebook/rag-sequence-nq":
-            raise ValueError("Not implemented")
-            self.model = ""
+            self.tokenizer = RagTokenizer.from_pretrained("facebook/rag-sequence-nq") 
+            self.retriever = RagRetriever.from_pretrained("facebook/rag-sequence-nq", index_name="exact", use_dummy_dataset=True) 
+            self.model = RagSequenceForGeneration.from_pretrained("facebook/rag-sequence-nq", retriever=retriever) 
             self.device = torch.device("cuda:0")
             self.model.to(self.device)
             self.model.eval()
-            self.tokenizer = AutoTokenizer.from_pretrained(cfg.get('pretrained_model_name'), model_max_length=cfg.get("evaluation_max_seq_len"))
 
         if self.retriever_selection == "bm25":
             document_set = cfg[2]['Document'].tolist()
@@ -116,13 +117,21 @@ class RAG_System:
             assert type(top_documents) == list 
             assert type(top_documents[0]) == str
             return top_documents
-        else:
+        elif self.retriever_selection == "facebook/rag-sequence-nq":
+            input_dict = self.tokenizer.prepare_seq2seq_batch(query, return_tensors="pt").to(self.device)
+            encoder_outputs = self.model(input_ids=input_dict["input_ids"]).question_encoder_last_hidden_state
+            outputs = self.retriever.retrieve(question_hidden_states=encoder_outputs.detach().numpy(), n_docs=top_k)
+            top_documents = outputs[2][0]['text']
+            return top_documents
+        elif "ada" in self.retriever_selection:
             question_embedding = np.array(get_embedding(query)).astype(np.float32)
             scores, samples = self.retriever.get_nearest_examples("embeddings", question_embedding, k=top_k)
             top_documents = samples["Document"][:]
             assert type(top_documents) == list 
             assert type(top_documents[0]) == str
             return top_documents
+        else:
+            raise ValueError("Not implemented")
 
     
     def generate_output(self, query: str, retrieved_documents, documents_to_use=1):
@@ -131,6 +140,11 @@ class RAG_System:
             assert type(llm_answer) == str 
             return llm_answer
         elif self.generative_LLM_selection == "facebook/rag-sequence-nq":
+            input_dict = self.tokenizer.prepare_seq2seq_batch(query, return_tensors="pt").to(self.device)
+            generated = self.model.generate(input_ids=input_dict["input_ids"]) 
+            llm_answer = self.tokenizer.batch_decode(generated, skip_special_tokens=True)[0]
+            return llm_answer
+        else:
             raise ValueError("Not implemented")
 
         
@@ -138,12 +152,15 @@ class RAG_System:
 
 ######################################################################
 
-datasets = ["nq", "fever", "record"]
+datasets = ["nq", "fever", "wow"]
 top_k = 1
-evaluation_cutoff = 10
+evaluation_cutoff = 5
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-RAG_systems = [["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"]]
+RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
+               ["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"]]#,
+               #["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"]]
+
 RAG_systems_save_folder = "RAG_Systems_Comparison/"
 
 ######################################################################
@@ -153,10 +170,10 @@ for dataset in datasets:
     RAG_evaluation_sets_collected = []
     for system in RAG_systems:
 
-        if dataset in ['nq', 'fever']:
+        if dataset in ['nq', 'fever', "wow"]:
             evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")
-        else:
-            evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
+        #else:
+        #    evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
         
         evaluation_dataset = evaluation_dataset[:evaluation_cutoff]
         system.append(evaluation_dataset)
@@ -169,20 +186,23 @@ for dataset in datasets:
         system_outputs = []
         for row in tqdm(range(len(evaluation_dataset))):
             
-            retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], evaluation_dataset['Document'].tolist())
-            system_output = evaluated_rag_system.generate_output(evaluation_dataset.iloc[row]['Query'], retrieved_documents)
+            if system[0] == "facebook/rag-sequence-nq":
 
-            if evaluation_dataset.iloc[row]['Document'] in retrieved_documents[:top_k]:
-                context_relevance_label = 1
             else:
-                context_relevance_label = 0
-            
-            answer_faithfulness_label, answer_relevance_label = evaluate_llm_generation(system_output, evaluation_dataset.iloc[row]['Answer'])
+                retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], evaluation_dataset['Document'].tolist())
+                system_output = evaluated_rag_system.generate_output(evaluation_dataset.iloc[row]['Query'], retrieved_documents)
 
-            context_relevance_labels.append(context_relevance_label)
-            answer_faithfulness_labels.append(answer_faithfulness_label)
-            answer_relevance_labels.append(answer_relevance_label)
-            system_outputs.append(system_output)
+                if evaluation_dataset.iloc[row]['Document'] in retrieved_documents[:top_k]:
+                    context_relevance_label = 1
+                else:
+                    context_relevance_label = 0
+                
+                answer_faithfulness_label, answer_relevance_label = evaluate_llm_generation(system_output, evaluation_dataset.iloc[row]['Answer'])
+
+                context_relevance_labels.append(context_relevance_label)
+                answer_faithfulness_labels.append(answer_faithfulness_label)
+                answer_relevance_labels.append(answer_relevance_label)
+                system_outputs.append(system_output)
 
         evaluation_dataset_copy = evaluation_dataset.copy()
         evaluation_dataset_copy['Context_Relevance_Label'] = context_relevance_labels

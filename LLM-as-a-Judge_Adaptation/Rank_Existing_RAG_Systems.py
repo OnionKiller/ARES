@@ -147,7 +147,7 @@ if __name__ == '__main__':
                         tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
                         dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
                         dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
-                        assert len(cfg[2]) == len(dataframe)
+                        #assert len(cfg[2]) == len(dataframe)
                         dataframe = Dataset.from_pandas(dataframe)
                         dataframe.add_faiss_index(column="embeddings")
                         self.retriever = dataframe

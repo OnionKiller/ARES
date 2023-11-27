@@ -77,8 +77,8 @@ if __name__ == '__main__':
     if "cnn_dm" in document_filepath.lower() or "CNN_DM" in document_filepath.lower():
         for_cnn_dm_dataset = True
 
-    regenerate_synth_questions = False #True
-    regenerate_answers = False #True
+    regenerate_synth_questions = True
+    regenerate_answers = True
     regenerate_embeddings = True
 
     lower_bound_for_negatives = 20

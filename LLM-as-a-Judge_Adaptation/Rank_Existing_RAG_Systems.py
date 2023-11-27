@@ -19,6 +19,7 @@ import math
 from transformers import RagTokenizer, RagRetriever, RagSequenceForGeneration, pipeline, AutoTokenizer, AutoConfig
 
 from rank_bm25 import BM25Okapi
+import os
 
 ######################################################################
 
@@ -95,13 +96,14 @@ class RAG_System:
             bm25_index = BM25Okapi(tokenized_documents)
             self.retriever = bm25_index
         elif "ada" in self.retriever_selection:
-            try:
-                dataframe_with_embeddings = pd.read_csv(cfg[3], sep="\t")
+            if os.path.exists(cfg[2]):
+                dataframe_with_embeddings = pd.read_csv(cfg[2], sep="\t")
                 print("Loaded embeddings from previous run!")
                 self.retriever = dataframe_with_embeddings
-            except:
+            else:
                 print("Generating embeddings from scratch!")
                 dataframe = cfg[2].drop_duplicates(subset="Document")
+                breakpoint()
                 tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
                 dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
                 dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
@@ -109,7 +111,9 @@ class RAG_System:
                 dataframe = Dataset.from_pandas(dataframe)
                 dataframe.add_faiss_index(column="embeddings")
                 self.retriever = dataframe
-                dataframe.to_csv(cfg[3], sep="\t")
+                breakpoint()
+                dataframe.to_csv(cfg[4], sep="\t")
+                assert False
 
         """elif self.retriever_selection == "facebook/rag-sequence-nq":
             dataframe = cfg[2].drop_duplicates(subset="Document")
@@ -260,7 +264,7 @@ for dataset in datasets:
         print("Document Count: " + str(len(documents_dataset)))
         
         evaluation_dataset = evaluation_dataset[:evaluation_cutoff]
-        system.append(evaluation_dataset)
+        #system.append(evaluation_dataset)
         system.append(documents_dataset)
         system.append(documents_filepath_with_embeddings)
 

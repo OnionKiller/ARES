@@ -122,7 +122,7 @@ class RAG_System:
         if self.generative_LLM_selection == "facebook/rag-sequence-nq":
             self.tokenizer = RagTokenizer.from_pretrained(self.generative_LLM_selection) 
             self.retriever = RagRetriever.from_pretrained(self.generative_LLM_selection, 
-                                                          index_name="exact", #"exact", 
+                                                          index_name="compressed", #"exact", 
                                                           use_dummy_dataset=False,
                                                           
                                                           #index_name="custom",

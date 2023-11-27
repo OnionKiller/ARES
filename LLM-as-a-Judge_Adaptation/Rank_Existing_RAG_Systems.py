@@ -134,7 +134,7 @@ if __name__ == '__main__':
                 elif "ada" in self.retriever_selection:
                     if os.path.exists(cfg[3]):
                         def string_to_np_array(s):
-                            return np.fromstring(s)
+                            return np.fromstring(s, dtype=float, sep=" ")
 
                         #############################
 

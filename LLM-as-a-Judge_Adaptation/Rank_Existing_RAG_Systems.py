@@ -38,7 +38,7 @@ correct_context_relevance_labels = True
 RAG_systems_save_folder = "RAG_Systems_Comparison/"
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
+RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]
 #RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
 #RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
 
@@ -48,7 +48,7 @@ RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
                   ["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"], ["mosaicml/mpt-7b-instruct", "colbertv2"]]"""
 
 if __name__ == '__main__':
-    with Run().context(RunConfig(nranks=1, experiment="msmarco")):
+    with Run().context(RunConfig(nranks=4, experiment="msmarco")):
 
         ######################################################################
 

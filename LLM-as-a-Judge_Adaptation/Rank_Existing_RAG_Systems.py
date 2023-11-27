@@ -169,7 +169,7 @@ if __name__ == '__main__':
                         print("Saved dataframe to: " + cfg[3])
                         assert False
                 elif self.retriever_selection == "colbertv2":
-                    frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
+                    frames = [cfg[4], cfg[2].sample(n=min(sampled_documents, len(cfg[2])), random_state=42)]
                     dataframe = pd.concat(frames)
                     dataframe = dataframe.drop_duplicates(subset="Document")
 

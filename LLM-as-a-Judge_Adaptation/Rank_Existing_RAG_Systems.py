@@ -96,9 +96,10 @@ class RAG_System:
             bm25_index = BM25Okapi(tokenized_documents)
             self.retriever = bm25_index
         elif "ada" in self.retriever_selection:
-            if os.path.exists(cfg[2]):
-                dataframe_with_embeddings = pd.read_csv(cfg[2], sep="\t")
+            if os.path.exists(cfg[3]):
+                dataframe_with_embeddings = pd.read_csv(cfg[3], sep="\t")
                 print("Loaded embeddings from previous run!")
+                dataframe_with_embeddings.add_faiss_index(column="embeddings")
                 self.retriever = dataframe_with_embeddings
             else:
                 print("Generating embeddings from scratch!")
@@ -112,7 +113,7 @@ class RAG_System:
                 dataframe.add_faiss_index(column="embeddings")
                 self.retriever = dataframe
                 breakpoint()
-                dataframe.to_csv(cfg[4], sep="\t")
+                dataframe.to_csv(cfg[3], sep="\t")
                 assert False
 
         """elif self.retriever_selection == "facebook/rag-sequence-nq":

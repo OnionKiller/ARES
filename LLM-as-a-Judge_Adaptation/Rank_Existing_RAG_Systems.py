@@ -38,14 +38,14 @@ correct_context_relevance_labels = True
 RAG_systems_save_folder = "RAG_Systems_Comparison/"
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]
+RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
 #RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
 #RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
 
-"""RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"],
-               ["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
-               ["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"],
-               ["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"]]"""
+"""RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
+                  ["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"], ["mosaicml/mpt-7b-instruct", "colbertv2"],
+                  ["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"], ["gpt-3.5-turbo", "colbertv2"],
+                  ["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"], ["mosaicml/mpt-7b-instruct", "colbertv2"]]"""
 
 if __name__ == '__main__':
     with Run().context(RunConfig(nranks=1, experiment="msmarco")):
@@ -152,7 +152,6 @@ if __name__ == '__main__':
                         self.retriever = dataframe
                         #breakpoint()
                         dataframe.to_csv(cfg[3], sep="\t")
-                        assert False
                 elif self.retriever_selection == "colbertv2":
                     frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
                     dataframe = pd.concat(frames)

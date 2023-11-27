@@ -158,7 +158,7 @@ class RAG_System:
             if __name__ == '__main__':
                 with Run().context(RunConfig(nranks=1, experiment="msmarco")):
 
-                    doc_maxlen = 128
+                    doc_maxlen = 256
                     query_maxlen = 32
                     nbits = 2
                     kmeans_niters = 4
@@ -174,8 +174,9 @@ class RAG_System:
                     )
                     indexer = Indexer(checkpoint="/future/u/jonsf/msmarco.psg.kldR2.nway64.ib__colbert-400000", config=config)
                     indexer.index(name=index_path, collection=collection, overwrite=True)
-                    searcher = Searcher(index=index_path, collection=collection)
-                    self.retriever = searcher
+                    
+            searcher = Searcher(index=index_path, collection=collection)
+            self.retriever = searcher
 
         """elif self.retriever_selection == "facebook/rag-sequence-nq":
             dataframe = cfg[2].drop_duplicates(subset="Document")

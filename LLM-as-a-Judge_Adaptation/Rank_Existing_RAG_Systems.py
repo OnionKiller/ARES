@@ -32,15 +32,15 @@ datasets = ["nq"] #, "fever", "wow"]
 top_k = 1
 evaluation_cutoff = 100
 max_new_tokens = 32
-sampled_documents = 1000000
+sampled_documents = 100000
 correct_context_relevance_labels = True
 
 RAG_systems_save_folder = "RAG_Systems_Comparison/"
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]
+#RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]
 #RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
-#RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
+RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
 
 """RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
                   ["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"], ["mosaicml/mpt-7b-instruct", "colbertv2"],

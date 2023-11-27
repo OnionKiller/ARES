@@ -166,7 +166,7 @@ if __name__ == '__main__':
                     doc_maxlen = 256
                     query_maxlen = 32
                     nbits = 2
-                    kmeans_niters = 8
+                    kmeans_niters = 4
                     index_path = f"doc_maxlen={doc_maxlen}_query_maxlen={query_maxlen}_nbits={nbits}_kmeans_niters={kmeans_niters}.latest_index"
 
                     config = ColBERTConfig(

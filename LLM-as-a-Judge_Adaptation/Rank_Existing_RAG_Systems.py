@@ -137,15 +137,23 @@ class RAG_System:
             if __name__ == '__main__':
                 with Run().context(RunConfig(nranks=1, experiment="msmarco")):
 
+                    doc_maxlen = 256
+                    query_maxlen=32
+                    nbits=2
+                    kmeans_niters=4
+
+                    index_path = f"doc_maxlen={doc_maxlen}_query_maxlen={query_maxlen}_nbits={nbits}_kmeans_niters={kmeans_niters}.latest_index"
+
                     config = ColBERTConfig(
-                        doc_maxlen=256, 
-                        nbits=2, 
-                        kmeans_niters=4,
+                        doc_maxlen=doc_maxlen,
+                        query_maxlen=query_maxlen, 
+                        nbits=nbits, 
+                        kmeans_niters=kmeans_niters,
                         root="experiments",
                     )
                     indexer = Indexer(checkpoint="/future/u/jonsf/msmarco.psg.kldR2.nway64.ib__colbert-400000", config=config)
-                    indexer.index(name="msmarco.nbits=2", collection=collection, overwrite=True)
-                    searcher = Searcher(index="msmarco.nbits=2", collection=collection)
+                    indexer.index(name=index_path, collection=collection, overwrite=True)
+                    searcher = Searcher(index=index_path, collection=collection)
                     self.retriever = searcher
 
         """elif self.retriever_selection == "facebook/rag-sequence-nq":

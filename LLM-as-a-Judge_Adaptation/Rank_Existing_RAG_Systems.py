@@ -132,22 +132,22 @@ if __name__ == '__main__':
                     self.retriever = bm25_index
 
                 elif "ada" in self.retriever_selection:
-                    if os.path.exists(cfg[3]):
-                        def string_to_np_array(s):
-                            return np.fromstring(s, dtype=float, sep=" ")
+                        """if os.path.exists(cfg[3]):
+                            def string_to_np_array(s):
+                                return np.fromstring(s, dtype=float, sep=" ")
 
-                        #############################
+                            #############################
 
-                        #dataframe_with_embeddings = load_dataset(cfg[3])
-                        dataframe_with_embeddings = pd.read_csv(cfg[3], sep="\t")
-                        dataframe_with_embeddings['embeddings'] = dataframe_with_embeddings['embeddings'].apply(string_to_np_array)
-                        print("Loaded embeddings from previous run!")
-                        dataframe_with_embeddings = Dataset.from_pandas(dataframe_with_embeddings)
-                        breakpoint()
-                        dataframe_with_embeddings.add_faiss_index(column="embeddings")
-                        self.retriever = dataframe_with_embeddings
-                        print("Document Count: " + str(len(dataframe_with_embeddings)))
-                    else:
+                            #dataframe_with_embeddings = load_dataset(cfg[3])
+                            dataframe_with_embeddings = pd.read_csv(cfg[3], sep="\t")
+                            dataframe_with_embeddings['embeddings'] = dataframe_with_embeddings['embeddings'].apply(string_to_np_array)
+                            print("Loaded embeddings from previous run!")
+                            dataframe_with_embeddings = Dataset.from_pandas(dataframe_with_embeddings)
+                            breakpoint()
+                            dataframe_with_embeddings.add_faiss_index(column="embeddings")
+                            self.retriever = dataframe_with_embeddings
+                            print("Document Count: " + str(len(dataframe_with_embeddings)))
+                        else:"""
                         #dataframe = cfg[2].drop_duplicates(subset="Document")
                         #print("Generating embeddings from scratch!")
                         frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
@@ -169,16 +169,16 @@ if __name__ == '__main__':
                         print("Saved dataframe to: " + cfg[3])
                         assert False
                 elif self.retriever_selection == "colbertv2":
-                    if os.path.exists(cfg[3]):
+                    """if os.path.exists(cfg[3]):
                         dataframe = pd.read_csv(cfg[3], sep="\t")
                         collection = dataframe['Document'].tolist()
                         print("Document Count: " + str(len(dataframe)))
-                    else:
-                        frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
-                        dataframe = pd.concat(frames)
-                        dataframe = dataframe.drop_duplicates(subset="Document")
-                        collection = dataframe['Document'].tolist()
-                        print("Document Count: " + str(len(dataframe)))
+                    else:"""
+                    frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
+                    dataframe = pd.concat(frames)
+                    dataframe = dataframe.drop_duplicates(subset="Document")
+                    collection = dataframe['Document'].tolist()
+                    print("Document Count: " + str(len(dataframe)))
 
                     #########################
 
@@ -331,11 +331,11 @@ if __name__ == '__main__':
                 evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")
                 documents_filepath = "../datasets_v2/decompressed_wikipedia_paragraphs.tsv"
                 documents_filepath_with_embeddings = documents_filepath.replace(".tsv", "_with_embeddings.tsv")
-                if not os.path.exists(documents_filepath_with_embeddings):
-                    documents_dataset = pd.read_csv(documents_filepath, sep="\t")
-                    documents_dataset['Document'] = documents_dataset['text']
-                else:
-                    documents_dataset = evaluation_dataset
+                #if not os.path.exists(documents_filepath_with_embeddings):
+                documents_dataset = pd.read_csv(documents_filepath, sep="\t")
+                documents_dataset['Document'] = documents_dataset['text']
+                #else:
+                #    documents_dataset = evaluation_dataset
             #else:
             #    evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
 

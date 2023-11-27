@@ -129,8 +129,7 @@ class RAG_System:
             dataframe = pd.concat(frames)
             dataframe = dataframe.drop_duplicates(subset="Document")
 
-            intermediate_dataframe_path = "../datasets_v2/colbertv2_docs.csv"
-            dataframe.to_csv(intermediate_dataframe_path, sep="\t")
+            collection = dataframe['Document'].tolist()
 
             from colbert.infra import Run, RunConfig, ColBERTConfig
             from colbert import Indexer, Searcher
@@ -138,12 +137,14 @@ class RAG_System:
             with Run().context(RunConfig(nranks=1, experiment="msmarco")):
 
                 config = ColBERTConfig(
-                    nbits=2,
+                    doc_maxlen=256, 
+                    nbits=2, 
+                    kmeans_niters=4,
                     root="experiments",
                 )
                 indexer = Indexer(checkpoint="/future/u/jonsf/msmarco.psg.kldR2.nway64.ib__colbert-400000", config=config)
-                indexer.index(name="msmarco.nbits=2", collection=intermediate_dataframe_path)
-                searcher = Searcher(index="msmarco.nbits=2", collection="msmarco.nbits=2")
+                indexer.index(name="msmarco.nbits=2", collection=collection, overwrite=True)
+                searcher = Searcher(index="msmarco.nbits=2", collection=collection)
                 self.retriever = searcher
 
         """elif self.retriever_selection == "facebook/rag-sequence-nq":

@@ -155,15 +155,14 @@ class RAG_System:
             from colbert.infra import Run, RunConfig, ColBERTConfig
             from colbert import Indexer, Searcher
 
+            doc_maxlen = 256
+            query_maxlen = 32
+            nbits = 2
+            kmeans_niters = 4
+            index_path = f"doc_maxlen={doc_maxlen}_query_maxlen={query_maxlen}_nbits={nbits}_kmeans_niters={kmeans_niters}.latest_index"
+
             if __name__ == '__main__':
                 with Run().context(RunConfig(nranks=1, experiment="msmarco")):
-
-                    doc_maxlen = 256
-                    query_maxlen = 32
-                    nbits = 2
-                    kmeans_niters = 4
-
-                    index_path = f"doc_maxlen={doc_maxlen}_query_maxlen={query_maxlen}_nbits={nbits}_kmeans_niters={kmeans_niters}.latest_index"
 
                     config = ColBERTConfig(
                         doc_maxlen=doc_maxlen,

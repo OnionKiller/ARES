@@ -95,14 +95,22 @@ class RAG_System:
             bm25_index = BM25Okapi(tokenized_documents)
             self.retriever = bm25_index
         elif "ada" in self.retriever_selection:
-            dataframe = cfg[2].drop_duplicates(subset="Document")
-            tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
-            dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
-            dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
-            assert len(cfg[2]) == len(dataframe)
-            dataframe = Dataset.from_pandas(dataframe)
-            dataframe.add_faiss_index(column="embeddings")
-            self.retriever = dataframe
+            try:
+                dataframe_with_embeddings = pd.read_csv(cfg[3], sep="\t")
+                print("Loaded embeddings from previous run!")
+                self.retriever = dataframe_with_embeddings
+            except:
+                print("Generating embeddings from scratch!")
+                dataframe = cfg[2].drop_duplicates(subset="Document")
+                tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
+                dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
+                dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
+                assert len(cfg[2]) == len(dataframe)
+                dataframe = Dataset.from_pandas(dataframe)
+                dataframe.add_faiss_index(column="embeddings")
+                self.retriever = dataframe
+                dataframe.to_csv(cfg[3], sep="\t")
+                
         """elif self.retriever_selection == "facebook/rag-sequence-nq":
             dataframe = cfg[2].drop_duplicates(subset="Document")
             tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
@@ -221,8 +229,8 @@ evaluation_cutoff = 100
 max_new_tokens = 32
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-#RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
-RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
+RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
+#RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
 
 """RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"],
                ["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
@@ -240,13 +248,19 @@ for dataset in datasets:
 
         if dataset in ['nq', 'fever', "wow"]:
             evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")
-            documents_dataset = pd.read_csv("../datasets_v2/decompressed_wikipedia_paragraphs.tsv", sep="\t")
+            documents_filepath = "../datasets_v2/decompressed_wikipedia_paragraphs.tsv"
+            documents_filepath_with_embeddings = documents_filepath.replace(".tsv", "_with_embeddings.tsv")
+            documents_dataset = pd.read_csv(documents_filepath, sep="\t")
+            documents_dataset['Document'] = documents_dataset['text']
         #else:
         #    evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
+
+        print("Document Count: " + str(len(documents_dataset)))
         
         evaluation_dataset = evaluation_dataset[:evaluation_cutoff]
         system.append(evaluation_dataset)
         system.append(documents_dataset)
+        system.append(documents_filepath_with_embeddings)
 
         evaluated_rag_system = RAG_System(cfg=system)
 

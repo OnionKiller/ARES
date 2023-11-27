@@ -91,10 +91,16 @@ class RAG_System:
         ################################################
 
         if self.retriever_selection == "bm25":
-            document_set = cfg[2]['Document'].tolist()
+
+            frames = [cfg[4], cfg[2].sample(n=100000, random_state=42)]
+            dataframe = pd.concat(frames)
+            dataframe = dataframe.drop_duplicates(subset="Document")
+
+            document_set = dataframe['Document'].tolist()
             tokenized_documents = [doc.split() for doc in document_set]
             bm25_index = BM25Okapi(tokenized_documents)
             self.retriever = bm25_index
+
         elif "ada" in self.retriever_selection:
             if os.path.exists(cfg[3]):
                 dataframe_with_embeddings = pd.read_csv(cfg[3], sep="\t")
@@ -103,11 +109,11 @@ class RAG_System:
                 self.retriever = dataframe_with_embeddings
             else:
                 #dataframe = cfg[2].drop_duplicates(subset="Document")
-                print("Generating embeddings from scratch!")
+                #print("Generating embeddings from scratch!")
                 frames = [cfg[4], cfg[2].sample(n=100000, random_state=42)]
                 dataframe = pd.concat(frames)
                 dataframe = dataframe.drop_duplicates(subset="Document")
-                breakpoint()
+                #breakpoint()
                 tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
                 dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
                 dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
@@ -115,9 +121,28 @@ class RAG_System:
                 dataframe = Dataset.from_pandas(dataframe)
                 dataframe.add_faiss_index(column="embeddings")
                 self.retriever = dataframe
-                breakpoint()
+                #breakpoint()
                 dataframe.to_csv(cfg[3], sep="\t")
                 assert False
+        elif self.retriever_selection == "colbertv2":
+            frames = [cfg[4], cfg[2].sample(n=100000, random_state=42)]
+            dataframe = pd.concat(frames)
+            dataframe = dataframe.drop_duplicates(subset="Document")
+            
+            intermediate_dataframe_path = "../datasets_v2/colbertv2_docs.csv"
+            dataframe.to_csv(intermediate_dataframe_path, sep="\t")
+
+            from colbert.infra import Run, RunConfig, ColBERTConfig
+            from colbert import Indexer
+
+            with Run().context(RunConfig(nranks=1, experiment="msmarco")):
+
+                config = ColBERTConfig(
+                    nbits=2,
+                    root="experiments",
+                )
+                indexer = Indexer(checkpoint="/future/u/jonsf/msmarco.psg.kldR2.nway64.ib__colbert-400000", config=config)
+                indexer.index(name="msmarco.nbits=2", collection=intermediate_dataframe_path)
 
         """elif self.retriever_selection == "facebook/rag-sequence-nq":
             dataframe = cfg[2].drop_duplicates(subset="Document")

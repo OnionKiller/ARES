@@ -141,6 +141,7 @@ if __name__ == '__main__':
                         #print("Generating embeddings from scratch!")
                         frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
                         dataframe = pd.concat(frames)
+                        dataframe = dataframe[:100]
                         dataframe = dataframe.drop_duplicates(subset="Document")
                         #breakpoint()
                         tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
@@ -152,6 +153,8 @@ if __name__ == '__main__':
                         self.retriever = dataframe
                         #breakpoint()
                         dataframe.to_csv(cfg[3], sep="\t")
+                        print("Saved dataframe to: " + cfg[3])
+                        assert False
                 elif self.retriever_selection == "colbertv2":
                     frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
                     dataframe = pd.concat(frames)

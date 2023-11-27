@@ -133,8 +133,14 @@ if __name__ == '__main__':
 
                 elif "ada" in self.retriever_selection:
                     if os.path.exists(cfg[3]):
+                        def string_to_np_array(s):
+                            return np.array(ast.literal_eval(s))
+
+                        #############################
+
                         #dataframe_with_embeddings = load_dataset(cfg[3])
                         dataframe_with_embeddings = pd.read_csv(cfg[3], sep="\t")
+                        dataframe_with_embeddings['embeddings'] = dataframe_with_embeddings['embeddings'].apply(string_to_np_array)
                         print("Loaded embeddings from previous run!")
                         dataframe_with_embeddings = Dataset.from_pandas(dataframe_with_embeddings)
                         breakpoint()

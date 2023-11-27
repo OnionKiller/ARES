@@ -102,8 +102,11 @@ class RAG_System:
                 dataframe_with_embeddings.add_faiss_index(column="embeddings")
                 self.retriever = dataframe_with_embeddings
             else:
+                #dataframe = cfg[2].drop_duplicates(subset="Document")
                 print("Generating embeddings from scratch!")
-                dataframe = cfg[2].drop_duplicates(subset="Document")
+                frames = [cfg[4], cfg[2].sample(n=100000, random_state=42)]
+                dataframe = pd.concat(frames)
+                dataframe = dataframe.drop_duplicates(subset="Document")
                 breakpoint()
                 tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
                 dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
@@ -265,9 +268,9 @@ for dataset in datasets:
         print("Document Count: " + str(len(documents_dataset)))
         
         evaluation_dataset = evaluation_dataset[:evaluation_cutoff]
-        #system.append(evaluation_dataset)
         system.append(documents_dataset)
         system.append(documents_filepath_with_embeddings)
+        system.append(evaluation_dataset)
 
         evaluated_rag_system = RAG_System(cfg=system)
 

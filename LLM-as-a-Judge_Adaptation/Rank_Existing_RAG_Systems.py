@@ -313,8 +313,11 @@ if __name__ == '__main__':
                 evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")
                 documents_filepath = "../datasets_v2/decompressed_wikipedia_paragraphs.tsv"
                 documents_filepath_with_embeddings = documents_filepath.replace(".tsv", "_with_embeddings.tsv")
-                documents_dataset = pd.read_csv(documents_filepath, sep="\t")
-                documents_dataset['Document'] = documents_dataset['text']
+                if not os.path.exists(documents_filepath_with_embeddings):
+                    documents_dataset = pd.read_csv(documents_filepath, sep="\t")
+                    documents_dataset['Document'] = documents_dataset['text']
+                else:
+                    documents_dataset = None
             #else:
             #    evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
 

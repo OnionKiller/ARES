@@ -32,7 +32,7 @@ datasets = ["nq"] #, "fever", "wow"]
 top_k = 1
 evaluation_cutoff = 100
 max_new_tokens = 32
-sampled_documents = 100000
+sampled_documents = 1000000
 correct_context_relevance_labels = True
 
 RAG_systems_save_folder = "RAG_Systems_Comparison/"
@@ -132,48 +132,29 @@ if __name__ == '__main__':
                     self.retriever = bm25_index
 
                 elif "ada" in self.retriever_selection:
-                        """if os.path.exists(cfg[3]):
-                            def string_to_np_array(s):
-                                return np.fromstring(s, dtype=float, sep=" ")
 
-                            #############################
+                    #dataframe = cfg[2].drop_duplicates(subset="Document")
+                    #print("Generating embeddings from scratch!")
+                    frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
+                    dataframe = pd.concat(frames)
+                    #dataframe = dataframe[:100]
+                    dataframe = dataframe.drop_duplicates(subset="Document")
+                    print("Document Count: " + str(len(dataframe)))
+                    tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
+                    dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
+                    dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
+                    #assert len(cfg[2]) == len(dataframe)
+                    dataframe = Dataset.from_pandas(dataframe)
+                    dataframe.add_faiss_index(column="embeddings")
+                    self.retriever = dataframe
 
-                            #dataframe_with_embeddings = load_dataset(cfg[3])
-                            dataframe_with_embeddings = pd.read_csv(cfg[3], sep="\t")
-                            dataframe_with_embeddings['embeddings'] = dataframe_with_embeddings['embeddings'].apply(string_to_np_array)
-                            print("Loaded embeddings from previous run!")
-                            dataframe_with_embeddings = Dataset.from_pandas(dataframe_with_embeddings)
-                            breakpoint()
-                            dataframe_with_embeddings.add_faiss_index(column="embeddings")
-                            self.retriever = dataframe_with_embeddings
-                            print("Document Count: " + str(len(dataframe_with_embeddings)))
-                        else:"""
-                        #dataframe = cfg[2].drop_duplicates(subset="Document")
-                        #print("Generating embeddings from scratch!")
-                        frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
-                        dataframe = pd.concat(frames)
-                        #dataframe = dataframe[:100]
-                        dataframe = dataframe.drop_duplicates(subset="Document")
-                        print("Document Count: " + str(len(dataframe)))
-                        #breakpoint()
-                        tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
-                        dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
-                        dataframe =  dataframe[dataframe['embeddings'].apply(lambda x: len(x)) == 1536]
-                        #assert len(cfg[2]) == len(dataframe)
-                        dataframe = Dataset.from_pandas(dataframe)
-                        dataframe.add_faiss_index(column="embeddings")
-                        self.retriever = dataframe
-                        #breakpoint()
-                        #dataframe.save_to_disk(cfg[3])
-                        dataframe.to_csv(cfg[3], sep="\t")
-                        print("Saved dataframe to: " + cfg[3])
-                        assert False
+                    #dataframe.save_to_disk(cfg[3])
+                    #dataframe.to_csv(cfg[3], sep="\t")
+                    #print("Saved dataframe to: " + cfg[3])
+                    #assert False
+
                 elif self.retriever_selection == "colbertv2":
-                    """if os.path.exists(cfg[3]):
-                        dataframe = pd.read_csv(cfg[3], sep="\t")
-                        collection = dataframe['Document'].tolist()
-                        print("Document Count: " + str(len(dataframe)))
-                    else:"""
+                    
                     frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
                     dataframe = pd.concat(frames)
                     dataframe = dataframe.drop_duplicates(subset="Document")
@@ -185,7 +166,7 @@ if __name__ == '__main__':
                     doc_maxlen = 256
                     query_maxlen = 32
                     nbits = 2
-                    kmeans_niters = 4
+                    kmeans_niters = 8
                     index_path = f"doc_maxlen={doc_maxlen}_query_maxlen={query_maxlen}_nbits={nbits}_kmeans_niters={kmeans_niters}.latest_index"
 
                     config = ColBERTConfig(
@@ -331,11 +312,8 @@ if __name__ == '__main__':
                 evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")
                 documents_filepath = "../datasets_v2/decompressed_wikipedia_paragraphs.tsv"
                 documents_filepath_with_embeddings = documents_filepath.replace(".tsv", "_with_embeddings.tsv")
-                #if not os.path.exists(documents_filepath_with_embeddings):
                 documents_dataset = pd.read_csv(documents_filepath, sep="\t")
                 documents_dataset['Document'] = documents_dataset['text']
-                #else:
-                #    documents_dataset = evaluation_dataset
             #else:
             #    evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
 

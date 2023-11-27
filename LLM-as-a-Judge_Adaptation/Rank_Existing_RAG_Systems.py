@@ -152,7 +152,7 @@ if __name__ == '__main__':
                         #print("Generating embeddings from scratch!")
                         frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
                         dataframe = pd.concat(frames)
-                        dataframe = dataframe[:100]
+                        #dataframe = dataframe[:100]
                         dataframe = dataframe.drop_duplicates(subset="Document")
                         print("Document Count: " + str(len(dataframe)))
                         #breakpoint()

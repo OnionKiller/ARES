@@ -124,6 +124,7 @@ if __name__ == '__main__':
                     frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
                     dataframe = pd.concat(frames)
                     dataframe = dataframe.drop_duplicates(subset="Document")
+                    print("Document Count: " + str(len(dataframe)))
 
                     document_set = dataframe['Document'].tolist()
                     tokenized_documents = [doc.split() for doc in document_set]
@@ -136,6 +137,7 @@ if __name__ == '__main__':
                         print("Loaded embeddings from previous run!")
                         dataframe_with_embeddings.add_faiss_index(column="embeddings")
                         self.retriever = dataframe_with_embeddings
+                        print("Document Count: " + str(len(dataframe_with_embeddings)))
                     else:
                         #dataframe = cfg[2].drop_duplicates(subset="Document")
                         #print("Generating embeddings from scratch!")
@@ -143,6 +145,7 @@ if __name__ == '__main__':
                         dataframe = pd.concat(frames)
                         dataframe = dataframe[:100]
                         dataframe = dataframe.drop_duplicates(subset="Document")
+                        print("Document Count: " + str(len(dataframe)))
                         #breakpoint()
                         tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
                         dataframe['embeddings'] = dataframe["Document"].progress_apply(lambda x: get_embedding(x, model=self.retriever_selection))
@@ -161,6 +164,7 @@ if __name__ == '__main__':
                     dataframe = dataframe.drop_duplicates(subset="Document")
 
                     collection = dataframe['Document'].tolist()
+                    print("Document Count: " + str(len(dataframe)))
 
                     #########################
 
@@ -317,16 +321,12 @@ if __name__ == '__main__':
                     documents_dataset = pd.read_csv(documents_filepath, sep="\t")
                     documents_dataset['Document'] = documents_dataset['text']
                 else:
-                    documents_dataset = None
+                    documents_dataset = evaluation_dataset
             #else:
             #    evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
 
-            print("Document Count: " + str(len(documents_dataset)))
-
             RAG_evaluation_sets_collected = []
             for system in RAG_systems:
-
-                print("Document Count: " + str(len(documents_dataset)))
                 
                 evaluation_dataset = evaluation_dataset[:evaluation_cutoff]
                 system.append(documents_dataset)

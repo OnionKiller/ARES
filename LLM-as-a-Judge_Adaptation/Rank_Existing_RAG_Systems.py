@@ -135,6 +135,7 @@ if __name__ == '__main__':
                     if os.path.exists(cfg[3]):
                         dataframe_with_embeddings = pd.read_csv(cfg[3], sep="\t")
                         print("Loaded embeddings from previous run!")
+                        dataframe_with_embeddings = Dataset.from_pandas(dataframe_with_embeddings)
                         dataframe_with_embeddings.add_faiss_index(column="embeddings")
                         self.retriever = dataframe_with_embeddings
                         print("Document Count: " + str(len(dataframe_with_embeddings)))

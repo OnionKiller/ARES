@@ -21,10 +21,10 @@ from transformers import RagTokenizer, RagRetriever, RagSequenceForGeneration, p
 from rank_bm25 import BM25Okapi
 import os
 
-from colbert.infra import Run, RunConfig, ColBERTConfig
-from colbert.data import Queries
-
+import colbert
 from colbert import Indexer, Searcher
+from colbert.infra import Run, RunConfig, ColBERTConfig
+from colbert.data import Queries, Collection
 
 ######################################################################
 
@@ -169,12 +169,16 @@ if __name__ == '__main__':
                         print("Saved dataframe to: " + cfg[3])
                         assert False
                 elif self.retriever_selection == "colbertv2":
-                    frames = [cfg[4], cfg[2].sample(n=min(sampled_documents, len(cfg[2])), random_state=42)]
-                    dataframe = pd.concat(frames)
-                    dataframe = dataframe.drop_duplicates(subset="Document")
-
-                    collection = dataframe['Document'].tolist()
-                    print("Document Count: " + str(len(dataframe)))
+                    if os.path.exists(cfg[3]):
+                        dataframe = pd.read_csv(cfg[3], sep="\t")
+                        collection = dataframe['Document'].tolist()
+                        print("Document Count: " + str(len(dataframe)))
+                    else:
+                        frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
+                        dataframe = pd.concat(frames)
+                        dataframe = dataframe.drop_duplicates(subset="Document")
+                        collection = dataframe['Document'].tolist()
+                        print("Document Count: " + str(len(dataframe)))
 
                     #########################
 

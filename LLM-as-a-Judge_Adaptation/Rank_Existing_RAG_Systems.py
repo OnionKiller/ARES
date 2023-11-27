@@ -110,7 +110,7 @@ class RAG_System:
                 dataframe.add_faiss_index(column="embeddings")
                 self.retriever = dataframe
                 dataframe.to_csv(cfg[3], sep="\t")
-                
+
         """elif self.retriever_selection == "facebook/rag-sequence-nq":
             dataframe = cfg[2].drop_duplicates(subset="Document")
             tqdm.pandas(desc="Generating document embeddings...", total=dataframe.shape[0])
@@ -243,17 +243,19 @@ RAG_systems_save_folder = "RAG_Systems_Comparison/"
 
 for dataset in datasets:
 
+    if dataset in ['nq', 'fever', "wow"]:
+        evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")
+        documents_filepath = "../datasets_v2/decompressed_wikipedia_paragraphs.tsv"
+        documents_filepath_with_embeddings = documents_filepath.replace(".tsv", "_with_embeddings.tsv")
+        documents_dataset = pd.read_csv(documents_filepath, sep="\t")
+        documents_dataset['Document'] = documents_dataset['text']
+    #else:
+    #    evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
+
+    print("Document Count: " + str(len(documents_dataset)))
+
     RAG_evaluation_sets_collected = []
     for system in RAG_systems:
-
-        if dataset in ['nq', 'fever', "wow"]:
-            evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")
-            documents_filepath = "../datasets_v2/decompressed_wikipedia_paragraphs.tsv"
-            documents_filepath_with_embeddings = documents_filepath.replace(".tsv", "_with_embeddings.tsv")
-            documents_dataset = pd.read_csv(documents_filepath, sep="\t")
-            documents_dataset['Document'] = documents_dataset['text']
-        #else:
-        #    evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
 
         print("Document Count: " + str(len(documents_dataset)))
         

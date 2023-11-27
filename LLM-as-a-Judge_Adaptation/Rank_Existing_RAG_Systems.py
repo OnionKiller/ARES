@@ -240,11 +240,13 @@ for dataset in datasets:
 
         if dataset in ['nq', 'fever', "wow"]:
             evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")
+            documents_dataset = pd.read_csv("../datasets_v2/decompressed_wikipedia_paragraphs.tsv", sep="\t")
         #else:
         #    evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
         
         evaluation_dataset = evaluation_dataset[:evaluation_cutoff]
         system.append(evaluation_dataset)
+        system.append(documents_dataset)
 
         evaluated_rag_system = RAG_System(cfg=system)
 
@@ -261,6 +263,9 @@ for dataset in datasets:
                     context_relevance_label = 1
                 else:
                     context_relevance_label = 0
+                    for doc in retrieved_documents[:top_k]:
+                        if doc in evaluation_dataset.iloc[row]['Document']:
+                            context_relevance_label = 1
                 
                 answer_faithfulness_label, answer_relevance_label = evaluate_llm_generation(system_output, evaluation_dataset.iloc[row]['Answer'])
 

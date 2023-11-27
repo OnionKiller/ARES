@@ -92,7 +92,7 @@ class RAG_System:
 
         if self.retriever_selection == "bm25":
 
-            frames = [cfg[4], cfg[2].sample(n=100000, random_state=42)]
+            frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
             dataframe = pd.concat(frames)
             dataframe = dataframe.drop_duplicates(subset="Document")
 
@@ -110,7 +110,7 @@ class RAG_System:
             else:
                 #dataframe = cfg[2].drop_duplicates(subset="Document")
                 #print("Generating embeddings from scratch!")
-                frames = [cfg[4], cfg[2].sample(n=100000, random_state=42)]
+                frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
                 dataframe = pd.concat(frames)
                 dataframe = dataframe.drop_duplicates(subset="Document")
                 #breakpoint()
@@ -125,7 +125,7 @@ class RAG_System:
                 dataframe.to_csv(cfg[3], sep="\t")
                 assert False
         elif self.retriever_selection == "colbertv2":
-            frames = [cfg[4], cfg[2].sample(n=100000, random_state=42)]
+            frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
             dataframe = pd.concat(frames)
             dataframe = dataframe.drop_duplicates(subset="Document")
 
@@ -134,18 +134,19 @@ class RAG_System:
             from colbert.infra import Run, RunConfig, ColBERTConfig
             from colbert import Indexer, Searcher
 
-            with Run().context(RunConfig(nranks=1, experiment="msmarco")):
+            if __name__ == '__main__':
+                with Run().context(RunConfig(nranks=1, experiment="msmarco")):
 
-                config = ColBERTConfig(
-                    doc_maxlen=256, 
-                    nbits=2, 
-                    kmeans_niters=4,
-                    root="experiments",
-                )
-                indexer = Indexer(checkpoint="/future/u/jonsf/msmarco.psg.kldR2.nway64.ib__colbert-400000", config=config)
-                indexer.index(name="msmarco.nbits=2", collection=collection, overwrite=True)
-                searcher = Searcher(index="msmarco.nbits=2", collection=collection)
-                self.retriever = searcher
+                    config = ColBERTConfig(
+                        doc_maxlen=256, 
+                        nbits=2, 
+                        kmeans_niters=4,
+                        root="experiments",
+                    )
+                    indexer = Indexer(checkpoint="/future/u/jonsf/msmarco.psg.kldR2.nway64.ib__colbert-400000", config=config)
+                    indexer.index(name="msmarco.nbits=2", collection=collection, overwrite=True)
+                    searcher = Searcher(index="msmarco.nbits=2", collection=collection)
+                    self.retriever = searcher
 
         """elif self.retriever_selection == "facebook/rag-sequence-nq":
             dataframe = cfg[2].drop_duplicates(subset="Document")
@@ -274,6 +275,7 @@ datasets = ["nq"] #, "fever", "wow"]
 top_k = 1
 evaluation_cutoff = 100
 max_new_tokens = 32
+sampled_documents = 100000
 
 # LLM + Retriever tuples of each RAG system to be evaluated
 RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]

@@ -23,6 +23,27 @@ import os
 
 ######################################################################
 
+datasets = ["nq"] #, "fever", "wow"]
+top_k = 1
+evaluation_cutoff = 100
+max_new_tokens = 32
+sampled_documents = 100000
+correct_context_relevance_labels = True
+
+RAG_systems_save_folder = "RAG_Systems_Comparison/"
+
+# LLM + Retriever tuples of each RAG system to be evaluated
+RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]
+#RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
+#RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
+
+"""RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"],
+               ["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
+               ["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"],
+               ["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"]]"""
+
+######################################################################
+
 def get_embedding(text, model="text-embedding-ada-002"):
     #text = text.replace("\n", " ")
     #if len(text) > 50:
@@ -137,10 +158,10 @@ class RAG_System:
             if __name__ == '__main__':
                 with Run().context(RunConfig(nranks=1, experiment="msmarco")):
 
-                    doc_maxlen = 256
-                    query_maxlen=32
-                    nbits=2
-                    kmeans_niters=4
+                    doc_maxlen = 128
+                    query_maxlen = 32
+                    nbits = 2
+                    kmeans_niters = 4
 
                     index_path = f"doc_maxlen={doc_maxlen}_query_maxlen={query_maxlen}_nbits={nbits}_kmeans_niters={kmeans_niters}.latest_index"
 
@@ -279,26 +300,6 @@ class RAG_System:
 
 ######################################################################
 
-datasets = ["nq"] #, "fever", "wow"]
-top_k = 1
-evaluation_cutoff = 100
-max_new_tokens = 32
-sampled_documents = 100000
-
-# LLM + Retriever tuples of each RAG system to be evaluated
-RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]
-#RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
-#RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
-
-"""RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"],
-               ["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
-               ["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"],
-               ["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"]]"""
-
-RAG_systems_save_folder = "RAG_Systems_Comparison/"
-
-######################################################################
-
 for dataset in datasets:
 
     if dataset in ['nq', 'fever', "wow"]:
@@ -354,6 +355,9 @@ for dataset in datasets:
                 print("answer_faithfulness_label: " + str(answer_faithfulness_label))
                 print("answer_relevance_label: " + str(answer_relevance_label))
                 print("-------------------------------------------------")
+
+                if correct_context_relevance_labels and answer_relevance_label == 1:
+                    context_relevance_label = 1
 
                 context_relevance_labels.append(context_relevance_label)
                 answer_faithfulness_labels.append(answer_faithfulness_label)

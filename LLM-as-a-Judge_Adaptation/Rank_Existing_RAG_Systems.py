@@ -128,12 +128,12 @@ class RAG_System:
             frames = [cfg[4], cfg[2].sample(n=100000, random_state=42)]
             dataframe = pd.concat(frames)
             dataframe = dataframe.drop_duplicates(subset="Document")
-            
+
             intermediate_dataframe_path = "../datasets_v2/colbertv2_docs.csv"
             dataframe.to_csv(intermediate_dataframe_path, sep="\t")
 
             from colbert.infra import Run, RunConfig, ColBERTConfig
-            from colbert import Indexer
+            from colbert import Indexer, Searcher
 
             with Run().context(RunConfig(nranks=1, experiment="msmarco")):
 
@@ -143,6 +143,8 @@ class RAG_System:
                 )
                 indexer = Indexer(checkpoint="/future/u/jonsf/msmarco.psg.kldR2.nway64.ib__colbert-400000", config=config)
                 indexer.index(name="msmarco.nbits=2", collection=intermediate_dataframe_path)
+                searcher = Searcher(index="msmarco.nbits=2", collection="msmarco.nbits=2")
+                self.retriever = searcher
 
         """elif self.retriever_selection == "facebook/rag-sequence-nq":
             dataframe = cfg[2].drop_duplicates(subset="Document")
@@ -217,11 +219,22 @@ class RAG_System:
             encoder_outputs = self.model(input_ids=input_dict["input_ids"]).question_encoder_last_hidden_state
             outputs = self.retriever.retrieve(question_hidden_states=encoder_outputs.cpu().detach().numpy(), n_docs=top_k)
             top_documents = outputs[2][0]['text']
+            assert type(top_documents) == list 
+            assert type(top_documents[0]) == str
             return top_documents
         elif "ada" in self.retriever_selection:
             question_embedding = np.array(get_embedding(query)).astype(np.float32)
             scores, samples = self.retriever.get_nearest_examples("embeddings", question_embedding, k=top_k)
             top_documents = samples["Document"][:]
+            assert type(top_documents) == list 
+            assert type(top_documents[0]) == str
+            return top_documents
+        elif "colbertv2" == self.retriever_selection:
+            results = self.retriever.search(query, k=top_k)
+            top_documents = []
+            for passage_id, passage_rank, passage_score in zip(*results):
+                #print(f"\t [{passage_rank}] \t\t {passage_score:.1f} \t\t {self.retriever.collection[passage_id]}")
+                top_documents.append(self.retriever.collection[passage_id])
             assert type(top_documents) == list 
             assert type(top_documents[0]) == str
             return top_documents
@@ -262,7 +275,8 @@ evaluation_cutoff = 100
 max_new_tokens = 32
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
+RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]
+#RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
 #RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
 
 """RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"],

@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
                 elif "ada" in self.retriever_selection:
                     if os.path.exists(cfg[3]):
-                        dataframe_with_embeddings = pd.read_csv(cfg[3], sep="\t")
+                        dataframe_with_embeddings = load_dataset(cfg[3])
                         print("Loaded embeddings from previous run!")
                         dataframe_with_embeddings = Dataset.from_pandas(dataframe_with_embeddings)
                         dataframe_with_embeddings.add_faiss_index(column="embeddings")
@@ -156,7 +156,8 @@ if __name__ == '__main__':
                         dataframe.add_faiss_index(column="embeddings")
                         self.retriever = dataframe
                         #breakpoint()
-                        dataframe.to_csv(cfg[3], sep="\t")
+                        dataframe.save_to_disk(cfg[3])
+                        #dataframe.to_csv(cfg[3], sep="\t")
                         print("Saved dataframe to: " + cfg[3])
                         assert False
                 elif self.retriever_selection == "colbertv2":

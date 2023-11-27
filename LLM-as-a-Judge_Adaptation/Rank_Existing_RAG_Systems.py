@@ -111,18 +111,25 @@ class RAG_System:
             assert len(cfg[2]) == len(dataframe)
             dataframe = Dataset.from_pandas(dataframe)
             dataframe.add_faiss_index(column="embeddings")
+
             self.faiss_path = "faiss_indexes/" + self.retriever_selection.replace("/", "-") + "_" + dataset + ".faiss"
-            dataframe.save_faiss_index('embeddings', self.faiss_path)"""
+            self.dataset_path = "faiss_indexes/" + self.retriever_selection.replace("/", "-") + "_" + dataset + "_dataset"
+            dataframe.save_faiss_index('embeddings', self.faiss_path)
+            dataframe.save_to_disk("", self.dataset_path)"""
 
         ################################################
 
         if self.generative_LLM_selection == "facebook/rag-sequence-nq":
-            self.tokenizer = RagTokenizer.from_pretrained("facebook/rag-sequence-nq") 
-            self.retriever = RagRetriever.from_pretrained("facebook/rag-sequence-nq", 
-                                                          index_name="exact", 
+            self.tokenizer = RagTokenizer.from_pretrained(self.generative_LLM_selection) 
+            self.retriever = RagRetriever.from_pretrained(self.generative_LLM_selection, 
+                                                          index_name="wiki_dpr", 
                                                           use_dummy_dataset=False,
+                                                          
+                                                          #index_name="custom",
+                                                          #passages_path=self.dataset_path,
+                                                          #index_path=self.faiss_path,
                                                           ) 
-            self.model = RagSequenceForGeneration.from_pretrained("facebook/rag-sequence-nq", retriever=self.retriever) 
+            self.model = RagSequenceForGeneration.from_pretrained(self.generative_LLM_selection, retriever=self.retriever) 
             self.device = torch.device("cuda:0")
             self.model.to(self.device)
             self.model.eval()

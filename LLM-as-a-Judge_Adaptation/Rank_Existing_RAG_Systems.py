@@ -38,9 +38,9 @@ correct_context_relevance_labels = True
 RAG_systems_save_folder = "RAG_Systems_Comparison/"
 
 # LLM + Retriever tuples of each RAG system to be evaluated
-#RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]
+RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]
 #RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
-RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
+#RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
 
 """RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
                   ["mosaicml/mpt-7b-instruct", "bm25"], ["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"], ["mosaicml/mpt-7b-instruct", "colbertv2"],
@@ -48,7 +48,7 @@ RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
                   ["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"], ["mosaicml/mpt-7b-instruct", "colbertv2"]]"""
 
 if __name__ == '__main__':
-    with Run().context(RunConfig(nranks=4, experiment="msmarco")):
+    #with Run().context(RunConfig(nranks=4, experiment="msmarco")):
 
         ######################################################################
 
@@ -163,25 +163,26 @@ if __name__ == '__main__':
 
                     #########################
 
-                    doc_maxlen = 256
-                    query_maxlen = 32
-                    nbits = 2
-                    kmeans_niters = 4
-                    index_path = f"doc_maxlen={doc_maxlen}_query_maxlen={query_maxlen}_nbits={nbits}_kmeans_niters={kmeans_niters}.latest_index"
+                    with Run().context(RunConfig(nranks=4, experiment="msmarco")):
+                        doc_maxlen = 256
+                        query_maxlen = 32
+                        nbits = 2
+                        kmeans_niters = 4
+                        index_path = f"doc_maxlen={doc_maxlen}_query_maxlen={query_maxlen}_nbits={nbits}_kmeans_niters={kmeans_niters}.latest_index"
 
-                    config = ColBERTConfig(
-                        doc_maxlen=doc_maxlen,
-                        query_maxlen=query_maxlen, 
-                        nbits=nbits, 
-                        kmeans_niters=kmeans_niters,
-                        root="experiments",
-                    )
-                    indexer = Indexer(checkpoint="/future/u/jonsf/msmarco.psg.kldR2.nway64.ib__colbert-400000", config=config)
-                    indexer.index(name=index_path, collection=collection, overwrite=True)
-                    index_path = indexer.get_index()
-                            
-                    searcher = Searcher(index=index_path, collection=collection)
-                    self.retriever = searcher
+                        config = ColBERTConfig(
+                            doc_maxlen=doc_maxlen,
+                            query_maxlen=query_maxlen, 
+                            nbits=nbits, 
+                            kmeans_niters=kmeans_niters,
+                            root="experiments",
+                        )
+                        indexer = Indexer(checkpoint="/future/u/jonsf/msmarco.psg.kldR2.nway64.ib__colbert-400000", config=config)
+                        indexer.index(name=index_path, collection=collection, overwrite=True)
+                        index_path = indexer.get_index()
+                                
+                        searcher = Searcher(index=index_path, collection=collection)
+                        self.retriever = searcher
 
                 """elif self.retriever_selection == "facebook/rag-sequence-nq":
                     dataframe = cfg[2].drop_duplicates(subset="Document")

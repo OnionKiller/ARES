@@ -47,6 +47,7 @@ RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
                   ["gpt-3.5-turbo", "bm25"], ["gpt-3.5-turbo", "text-embedding-ada-002"], ["gpt-3.5-turbo", "colbertv2"],
                   ["gpt-4", "bm25"], ["gpt-4", "text-embedding-ada-002"], ["mosaicml/mpt-7b-instruct", "colbertv2"]]"""
 
+print("Beginning RAG generation!")
 if __name__ == '__main__':
     #with Run().context(RunConfig(nranks=4, experiment="msmarco")):
 
@@ -309,6 +310,8 @@ if __name__ == '__main__':
 
         for dataset in datasets:
 
+            print(f"Starting on {dataset}")
+
             if dataset in ['nq', 'fever', "wow"]:
                 evaluation_dataset = pd.read_csv(f"../datasets_v2/{dataset}/ratio_1.0_reformatted_full_articles_False_validation_with_negatives.tsv", sep="\t")
                 documents_filepath = "../datasets_v2/decompressed_wikipedia_paragraphs.tsv"
@@ -320,6 +323,8 @@ if __name__ == '__main__':
 
             RAG_evaluation_sets_collected = []
             for system in RAG_systems:
+
+                print(f"Starting on {('_').join(system)}")
                 
                 evaluation_dataset = evaluation_dataset[:evaluation_cutoff]
                 system.append(documents_dataset)

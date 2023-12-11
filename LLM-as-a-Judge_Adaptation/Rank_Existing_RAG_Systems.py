@@ -123,7 +123,7 @@ if __name__ == '__main__':
 
                 if self.retriever_selection == "bm25":
 
-                    frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
+                    frames = [cfg[4], cfg[2]]
                     dataframe = pd.concat(frames)
                     dataframe = dataframe.drop_duplicates(subset="Document")
                     print("Document Count: " + str(len(dataframe)))
@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
                     #dataframe = cfg[2].drop_duplicates(subset="Document")
                     #print("Generating embeddings from scratch!")
-                    frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
+                    frames = [cfg[4], cfg[2]]
                     dataframe = pd.concat(frames)
                     #dataframe = dataframe[:100]
                     dataframe = dataframe.drop_duplicates(subset="Document")
@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
                 elif self.retriever_selection == "colbertv2":
                     
-                    frames = [cfg[4], cfg[2].sample(n=sampled_documents, random_state=42)]
+                    frames = [cfg[4], cfg[2]]
                     dataframe = pd.concat(frames)
                     dataframe = dataframe.drop_duplicates(subset="Document")
                     collection = dataframe['Document'].tolist()
@@ -319,6 +319,7 @@ if __name__ == '__main__':
                 documents_filepath_with_embeddings = documents_filepath.replace(".tsv", "_with_embeddings.tsv")
                 documents_dataset = pd.read_csv(documents_filepath, sep="\t")
                 documents_dataset['Document'] = documents_dataset['text']
+                documents_dataset = documents_dataset.sample(n=sampled_documents, random_state=42)
             #else:
             #    evaluation_dataset = pd.read_csv("../datasets_v2/record/record_validation_with_negatives.tsv", sep="\t")
 
@@ -339,7 +340,8 @@ if __name__ == '__main__':
                 answer_relevance_labels = []
                 system_outputs = []
 
-                total_documents = documents_dataset['Document'].tolist()
+                total_documents = documents_dataset['Document'].tolist() + evaluation_dataset['Document'].tolist()
+                total_documents = list(set(total_documents))
                 for row in tqdm(range(len(evaluation_dataset))):
                     
                         retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], total_documents)

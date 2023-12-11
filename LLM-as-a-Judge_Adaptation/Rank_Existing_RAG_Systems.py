@@ -39,7 +39,8 @@ RAG_systems_save_folder = "RAG_Systems_Comparison/"
 
 # LLM + Retriever tuples of each RAG system to be evaluated
 #RAG_systems = [["mosaicml/mpt-7b-instruct", "colbertv2"]]
-RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
+#RAG_systems = [["mosaicml/mpt-7b-instruct", "text-embedding-ada-002"]]
+RAG_systems = [["mosaicml/mpt-7b-instruct", "bm25"]]
 #RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"]]
 
 """RAG_systems = [["facebook/rag-sequence-nq", "facebook/rag-sequence-nq"],
@@ -337,9 +338,11 @@ if __name__ == '__main__':
                 answer_faithfulness_labels = []
                 answer_relevance_labels = []
                 system_outputs = []
+
+                total_documents = documents_dataset['Document'].tolist()
                 for row in tqdm(range(len(evaluation_dataset))):
                     
-                        retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], evaluation_dataset['Document'].tolist())
+                        retrieved_documents = evaluated_rag_system.retrieve_documents(evaluation_dataset.iloc[row]['Query'], total_documents)
                         system_output = evaluated_rag_system.generate_output(evaluation_dataset.iloc[row]['Query'], retrieved_documents)
 
                         if evaluation_dataset.iloc[row]['Document'] in retrieved_documents[:top_k]:

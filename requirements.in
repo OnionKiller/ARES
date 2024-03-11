@@ -1,0 +1,10 @@
+datasets
+numpy
+openai
+pandas
+pyarrow
+Requests
+scikit_learn
+torch
+tqdm
+transformers
